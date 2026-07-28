@@ -1,0 +1,23 @@
+# Java / Maven
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# Node / React (pour plus tard)
+node_modules/
+dist/
+build/
+
+# Editeurs
+.vscode/
+.idea/
+*.iml
+
+# Systeme
+.DS_Store
+*.log
+
+# Secrets locaux
+.env
+application-local.properties
