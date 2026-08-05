@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import cm.merombe.backend.repository.LocalRepository;
 import cm.merombe.backend.repository.VilleRepository;
 
 @SpringBootApplication
@@ -14,14 +15,14 @@ public class BackendApplication {
 		SpringApplication.run(BackendApplication.class, args);
 	}
 
-	// Verification temporaire : on prouve que Java lit bien la base.
-	// A supprimer une fois la lecture confirmee.
+	// Verification temporaire de la lecture, a supprimer plus tard
 	@Bean
-	CommandLineRunner testerLectureVilles(VilleRepository villes) {
+	CommandLineRunner testerLecture(VilleRepository villes, LocalRepository locaux) {
 		return args -> {
-			System.out.println("=== Villes en base : " + villes.count() + " ===");
-			villes.findAll().forEach(v ->
-				System.out.println("  - " + v.getNom() + " (" + v.getRegion() + ")"));
+			System.out.println("=== Villes : " + villes.count() + " ===");
+			System.out.println("=== Locaux : " + locaux.count() + " ===");
+			locaux.findAll().forEach(l ->
+				System.out.println("  - " + l.getQuartier() + " -> " + l.getPosition()));
 		};
 	}
 
