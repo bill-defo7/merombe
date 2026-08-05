@@ -14,4 +14,4 @@ CREATE TABLE code_verification (
 );
 
 -- retrouver rapidement les codes d'un numero donne
-CREATE INDEX idx_code_telephone ON code_verification (telephone);
+CREATE INDEX IF NOT EXISTS idx_code_telephone ON code_verification (telephone);
