@@ -2,13 +2,16 @@ package cm.merombe.backend.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import cm.merombe.backend.dto.DepartRechercheDto;
 import cm.merombe.backend.entity.Depart;
+import jakarta.persistence.LockModeType;
 
 public interface DepartRepository extends JpaRepository<Depart, Integer> {
 
@@ -42,4 +45,10 @@ public interface DepartRepository extends JpaRepository<Depart, Integer> {
                                         @Param("villeArriveeId") Integer villeArriveeId,
                                         @Param("date") LocalDate date,
                                         @Param("nbPlaces") Integer nbPlaces);
+
+    // SELECT ... FOR UPDATE : bloque la ligne jusqu'a la fin de la transaction.
+    // C'est ce qui empeche deux voyageurs de vendre la meme derniere place.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT d FROM Depart d WHERE d.id = :id")
+    Optional<Depart> trouverEtVerrouiller(@Param("id") Integer id);
 }
