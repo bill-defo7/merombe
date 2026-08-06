@@ -11,6 +11,7 @@ import cm.merombe.backend.dto.*;
 import cm.merombe.backend.entity.*;
 import cm.merombe.backend.repository.*;
 import cm.merombe.backend.service.ContexteUtilisateur;
+import cm.merombe.backend.service.GenerationDeparts;
 import jakarta.transaction.Transactional;
 
 @RestController
@@ -22,17 +23,21 @@ public class AgenceBackOfficeController {
     private final HoraireRepository horaires;
     private final LocalRepository locaux;
     private final VilleRepository villes;
+    private final GenerationDeparts generation;
+    
 
     public AgenceBackOfficeController(ContexteUtilisateur contexte,
                                       LiaisonRepository liaisons,
                                       HoraireRepository horaires,
                                       LocalRepository locaux,
-                                      VilleRepository villes) {
+                                      VilleRepository villes,
+                                      GenerationDeparts generation) {
         this.contexte = contexte;
         this.liaisons = liaisons;
         this.horaires = horaires;
         this.locaux = locaux;
         this.villes = villes;
+        this.generation = generation;
     }
 
     @GetMapping("/liaisons")
@@ -101,5 +106,13 @@ public class AgenceBackOfficeController {
         Horaire cree = horaires.save(new Horaire(
                 liaison, heure, jours, demande.places(), demande.tarif(), garantie));
         return ResponseEntity.ok(Map.of("id", cree.getId(), "message", "Horaire cree"));
+    }
+
+    // declenchement manuel, utile en developpement et apres une declaration
+    @PostMapping("/generer-departs")
+    public ResponseEntity<?> genererDeparts() {
+        contexte.agenceCourante();   // verifie que l'appelant est bien un guichetier actif
+        int crees = generation.genererProchainsJours();
+        return ResponseEntity.ok(Map.of("crees", crees));
     }
 }
