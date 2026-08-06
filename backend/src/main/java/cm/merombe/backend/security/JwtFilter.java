@@ -34,15 +34,16 @@ public class JwtFilter extends OncePerRequestFilter {
         if (entete != null && entete.startsWith("Bearer ")) {
             String jeton = entete.substring(7);
             try {
-                Claims donnees = jwtService.lireJeton(jeton);
-                String telephone = donnees.getSubject();
+               Claims donnees = jwtService.lireJeton(jeton);
+                Integer utilisateurId = donnees.get("id", Integer.class);
                 String role = donnees.get("role", String.class);
 
-                // Spring Security attend le prefixe ROLE_ pour ses controles
                 var autorites = List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
 
+                // on place l'identifiant comme principal : le controleur
+                // pourra relire l'utilisateur en base a chaque requete
                 var authentification = new UsernamePasswordAuthenticationToken(
-                        telephone, null, autorites);
+                        utilisateurId, null, autorites);
                 SecurityContextHolder.getContext().setAuthentication(authentification);
 
             } catch (Exception e) {
