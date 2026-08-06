@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
 
                 // consultation libre pour le voyageur non connecte
-                .requestMatchers(HttpMethod.GET, "/api/villes/**", "/api/agences/**", "/api/locaux/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/villes/**", "/api/agences/**", "/api/locaux/**", "/api/recherche/**").permitAll()
 
                 // espaces reserves par role
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
