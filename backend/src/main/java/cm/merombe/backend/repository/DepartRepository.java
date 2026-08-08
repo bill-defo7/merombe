@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import cm.merombe.backend.dto.DepartAgenceDto;
 import cm.merombe.backend.dto.DepartRechercheDto;
 import cm.merombe.backend.entity.Depart;
 import jakarta.persistence.LockModeType;
@@ -51,4 +52,21 @@ public interface DepartRepository extends JpaRepository<Depart, Integer> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT d FROM Depart d WHERE d.id = :id")
     Optional<Depart> trouverEtVerrouiller(@Param("id") Integer id);
+
+    // departs a venir de l'agence, avec les places offertes et restantes
+    @Query("""
+            SELECT new cm.merombe.backend.dto.DepartAgenceDto(
+                d.id, d.dateDepart, h.heure, va.nom,
+                h.places, d.placesDispo, h.tarif, d.statut)
+            FROM Depart d
+            JOIN d.horaire h
+            JOIN h.liaison l
+            JOIN l.localDepart ld
+            JOIN l.villeArrivee va
+            WHERE ld.agence.id = :agenceId
+              AND d.dateDepart >= :depuis
+            ORDER BY d.dateDepart, h.heure
+            """)
+    List<DepartAgenceDto> listerPourAgence(@Param("agenceId") Integer agenceId,
+                                           @Param("depuis") LocalDate depuis);
 }

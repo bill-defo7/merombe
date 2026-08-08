@@ -1,5 +1,6 @@
 package cm.merombe.backend.controller;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -24,20 +25,25 @@ public class AgenceBackOfficeController {
     private final LocalRepository locaux;
     private final VilleRepository villes;
     private final GenerationDeparts generation;
-    
+    private final DepartRepository departs;
+    private final ReservationRepository reservations;
 
     public AgenceBackOfficeController(ContexteUtilisateur contexte,
                                       LiaisonRepository liaisons,
                                       HoraireRepository horaires,
                                       LocalRepository locaux,
                                       VilleRepository villes,
-                                      GenerationDeparts generation) {
+                                      GenerationDeparts generation,
+                                      DepartRepository departs,
+                                      ReservationRepository reservations) {
         this.contexte = contexte;
         this.liaisons = liaisons;
         this.horaires = horaires;
         this.locaux = locaux;
         this.villes = villes;
         this.generation = generation;
+        this.departs = departs;
+        this.reservations = reservations;
     }
 
     @GetMapping("/liaisons")
@@ -114,5 +120,51 @@ public class AgenceBackOfficeController {
         contexte.agenceCourante();   // verifie que l'appelant est bien un guichetier actif
         int crees = generation.genererProchainsJours();
         return ResponseEntity.ok(Map.of("crees", crees));
+    }
+
+    // --- Etape 3.4 : suivi des reservations et tableau de bord ---
+
+    @GetMapping("/departs")
+    public List<DepartAgenceDto> mesDeparts() {
+        return departs.listerPourAgence(contexte.agenceCourante().getId(), LocalDate.now());
+    }
+
+    @GetMapping("/departs/{departId}/passagers")
+    @Transactional
+    public ResponseEntity<?> passagers(@PathVariable Integer departId) {
+        Agence agence = contexte.agenceCourante();
+
+        Depart depart = departs.findById(departId).orElse(null);
+        if (depart == null) {
+            return ResponseEntity.badRequest().body(Map.of("erreur", "depart inconnu"));
+        }
+        // le depart doit appartenir a l'agence du guichetier
+        Integer proprietaire = depart.getHoraire().getLiaison()
+                .getLocalDepart().getAgence().getId();
+        if (!proprietaire.equals(agence.getId())) {
+            return ResponseEntity.status(403)
+                    .body(Map.of("erreur", "ce depart n'appartient pas a votre agence"));
+        }
+
+        return ResponseEntity.ok(reservations.listerPassagers(departId));
+    }
+
+    @GetMapping("/tableau-de-bord")
+    public Map<String, Object> tableauDeBord() {
+        Agence agence = contexte.agenceCourante();
+       // la requete renvoie une seule ligne de trois valeurs
+        Object[] chiffres = reservations.chiffresAgence(agence.getId()).get(0);
+
+        List<DepartAgenceDto> aVenir = departs.listerPourAgence(agence.getId(), LocalDate.now());
+        int offertes = aVenir.stream().mapToInt(DepartAgenceDto::placesTotal).sum();
+        int vendues = aVenir.stream().mapToInt(DepartAgenceDto::placesVendues).sum();
+
+        return Map.of(
+                "agence", agence.getNom(),
+                "recettesFCFA", chiffres[0],
+                "placesPayees", chiffres[1],
+                "reservationsConfirmees", chiffres[2],
+                "departsAVenir", aVenir.size(),
+                "tauxRemplissage", offertes == 0 ? 0 : Math.round(vendues * 100.0 / offertes));
     }
 }
