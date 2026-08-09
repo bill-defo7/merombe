@@ -40,6 +40,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/agence/**").hasAnyRole("GUICHETIER", "ADMIN")
                 .requestMatchers("/api/embarquement/**").hasAnyRole("AGENT", "ADMIN")
 
+                // rappel de l'agregateur : appele par un serveur exterieur
+                .requestMatchers(HttpMethod.POST, "/api/paiements/rappel").permitAll()
+
                 // tout le reste demande une connexion
                 .anyRequest().authenticated()
             )
