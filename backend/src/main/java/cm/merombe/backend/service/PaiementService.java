@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import cm.merombe.backend.entity.Billet;
 import cm.merombe.backend.entity.Depart;
 import cm.merombe.backend.entity.Paiement;
 import cm.merombe.backend.entity.Reservation;
@@ -20,9 +21,9 @@ import cm.merombe.backend.repository.ReservationRepository;
 /**
  * Machine a etats du paiement (section 7.4 du cahier des charges).
  *
- * en_attente -> reussi  : la reservation est confirmee, la place est vendue
+ * en_attente -> reussi  : la reservation est confirmee, le billet est emis
  * en_attente -> echoue  : les places sont relachees immediatement
- * sans reponse          : reinterrogation periodique, puis abandon
+ * sans reponse          : reinterrogation periodique, puis a_verifier
  */
 @Service
 public class PaiementService {
@@ -34,15 +35,18 @@ public class PaiementService {
     private final PaiementRepository paiements;
     private final ReservationRepository reservations;
     private final DepartRepository departs;
+    private final BilletService billetService;
 
     public PaiementService(PasserellePaiement passerelle,
                            PaiementRepository paiements,
                            ReservationRepository reservations,
-                           DepartRepository departs) {
+                           DepartRepository departs,
+                           BilletService billetService) {
         this.passerelle = passerelle;
         this.paiements = paiements;
         this.reservations = reservations;
         this.departs = departs;
+        this.billetService = billetService;
     }
 
     /**
@@ -101,8 +105,9 @@ public class PaiementService {
                 if ("en_attente".equals(r.getStatut())) {
                     r.setStatut("confirmee");
                 }
+                Billet billet = billetService.emettre(r);
                 System.out.println(">>> Paiement reussi : reservation "
-                        + r.getId() + " confirmee (" + paiement.getMontant() + " FCFA)");
+                        + r.getId() + " confirmee — billet " + billet.getCode());
             }
             case ECHOUE -> {
                 paiement.setStatut("echoue");
@@ -110,7 +115,9 @@ public class PaiementService {
                 System.out.println(">>> Paiement echoue : places relachees");
             }
             case A_VERIFIER -> {
-                // on ne touche a rien : un administrateur devra rapprocher
+                // l'agregateur ne repond plus : on ignore si l'argent a ete
+                // preleve. Ni confirmer ni annuler ne serait correct.
+                paiement.setStatut("a_verifier");
                 System.out.println(">>> Paiement a verifier : " + reference
                         + " — rapprochement manuel necessaire");
             }

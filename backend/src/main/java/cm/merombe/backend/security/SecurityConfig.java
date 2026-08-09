@@ -43,6 +43,8 @@ public class SecurityConfig {
                 // rappel de l'agregateur : appele par un serveur exterieur
                 .requestMatchers(HttpMethod.POST, "/api/paiements/rappel").permitAll()
 
+                .requestMatchers("/api/embarquement/**", "/api/billets/controler").hasAnyRole("AGENT", "ADMIN")
+
                 // tout le reste demande une connexion
                 .anyRequest().authenticated()
             )
