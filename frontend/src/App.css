@@ -1,0 +1,143 @@
+:root {
+  --vert: #0a7d3f;
+  --vert-clair: #e8f5ec;
+  --gris: #6b7280;
+  --bordure: #e5e7eb;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #f9fafb;
+  color: #111827;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+}
+
+header h1 {
+  margin: 0;
+  color: var(--vert);
+  font-size: 2rem;
+  letter-spacing: -0.5px;
+}
+
+.sous-titre {
+  margin: 4px 0 28px;
+  color: var(--gris);
+}
+
+.recherche {
+  display: grid;
+  gap: 14px;
+  background: white;
+  padding: 20px;
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+}
+
+.recherche label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gris);
+}
+
+.recherche select,
+.recherche input {
+  padding: 11px 12px;
+  font-size: 1rem;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  background: white;
+  color: #111827;
+}
+
+.recherche button {
+  margin-top: 4px;
+  padding: 13px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: var(--vert);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.recherche button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.erreur {
+  margin-top: 20px;
+  padding: 12px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #991b1b;
+}
+
+.vide {
+  margin-top: 24px;
+  text-align: center;
+  color: var(--gris);
+}
+
+.resultats {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+  display: grid;
+  gap: 12px;
+}
+
+.depart {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+  background: white;
+  padding: 16px;
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+}
+
+.heure {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--vert);
+}
+
+.indicatif {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--gris);
+}
+
+.details {
+  display: grid;
+  gap: 3px;
+  font-size: 0.875rem;
+}
+
+.details span {
+  color: var(--gris);
+}
+
+.places {
+  color: var(--vert) !important;
+  font-weight: 500;
+}
+
+.tarif {
+  font-size: 1.05rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
