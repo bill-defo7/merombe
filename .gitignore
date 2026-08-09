@@ -21,3 +21,10 @@ build/
 # Secrets locaux
 .env
 application-local.properties
+
+.voyageur
+.guichetier
+.alice
+.paul
+.agent
+.jeton
