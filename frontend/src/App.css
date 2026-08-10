@@ -140,4 +140,170 @@ header h1 {
   font-size: 1.05rem;
   font-weight: 600;
   white-space: nowrap;
+
+  .carte {
+  background: white;
+  padding: 20px;
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+}
+
+.carte h2 {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+}
+
+.info {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--gris);
+}
+
+.lien {
+  background: none !important;
+  border: none;
+  color: var(--vert) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  padding: 8px !important;
+  cursor: pointer;
+  text-align: center;
+}
+
+.entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.compte {
+  display: flex;
+  gap: 4px;
+}
+
+.depart {
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.depart:hover {
+  border-color: var(--vert);
+}
+
+.recapitulatif {
+  padding: 14px;
+  background: var(--vert-clair);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.recapitulatif p {
+  margin: 3px 0;
+  font-size: 0.9rem;
+}
+
+.champ {
+  display: grid;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gris);
+  margin-bottom: 14px;
+}
+
+.champ select {
+  padding: 11px 12px;
+  font-size: 1rem;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+}
+
+.total {
+  font-size: 1.1rem;
+  margin: 16px 0;
+}
+
+.carte > button:not(.lien) {
+  width: 100%;
+  padding: 13px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: var(--vert);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.carte > button:disabled {
+  opacity: 0.6;
+}
+
+.moyens {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.moyens button {
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: var(--vert);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.titre-section {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+}
+
+.billet {
+  background: white;
+  padding: 16px;
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+}
+
+.billet p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.billet-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.code {
+  font-family: monospace;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--vert);
+}
+
+.etat {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: var(--vert-clair);
+  color: var(--vert);
+}
+
+.etat.utilise {
+  background: #f3f4f6;
+  color: var(--gris);
+}
+
+.details-billet {
+  color: var(--gris);
+}
+
 }

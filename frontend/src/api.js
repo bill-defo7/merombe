@@ -32,4 +32,30 @@ export const api = {
 
   locauxProches: (latitude, longitude, rayon = 10000) =>
     appeler(`/locaux/proches?latitude=${latitude}&longitude=${longitude}&rayon=${rayon}`),
+
+  demanderCode: (telephone) =>
+    appeler('/auth/demander-code', {
+      method: 'POST',
+      body: JSON.stringify({ telephone }),
+    }),
+
+  verifierCode: (telephone, code) =>
+    appeler('/auth/verifier-code', {
+      method: 'POST',
+      body: JSON.stringify({ telephone, code }),
+    }),
+
+  reserver: (departId, nbPlaces) =>
+    appeler('/reservations', {
+      method: 'POST',
+      body: JSON.stringify({ departId, nbPlaces }),
+    }),
+
+  payer: (reservationId, moyen) =>
+    appeler('/paiements', {
+      method: 'POST',
+      body: JSON.stringify({ reservationId, moyen }),
+    }),
+
+  mesBillets: () => appeler('/billets/mes-billets'),
 };
