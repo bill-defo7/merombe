@@ -19,7 +19,9 @@ public interface LocalRepository extends JpaRepository<Local, Integer> {
                    a.nom AS agence_nom,
                    v.nom AS ville_nom,
                    ROUND(ST_Distance(l.position,
-                         ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography)) AS distance_m
+                         ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography)) AS distance_m,
+                   ST_Y(l.position::geometry) AS latitude,
+                   ST_X(l.position::geometry) AS longitude
             FROM local l
             JOIN agence a ON a.id = l.agence_id
             JOIN ville  v ON v.id = l.ville_id

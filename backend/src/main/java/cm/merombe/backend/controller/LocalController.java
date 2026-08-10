@@ -39,7 +39,9 @@ public class LocalController {
                         "quartier", ligne[1],
                         "agence", ligne[2],
                         "ville", ligne[3],
-                        "distanceMetres", ligne[4]))
+                        "distanceMetres", ligne[4],
+                        "latitude", ligne[5],
+                        "longitude", ligne[6]))
                 .toList();
 
         return ResponseEntity.ok(resultats);

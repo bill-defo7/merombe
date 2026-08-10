@@ -324,4 +324,26 @@ header h1 {
   text-align: center;
 }
 
+.zone-carte {
+  height: 340px;
+  margin-bottom: 20px;
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* marqueur dessine a la main : Leaflet ne trouve pas ses icones avec Vite */
+.pastille {
+  width: 18px;
+  height: 18px;
+  background: var(--vert);
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.leaflet-container {
+  font-family: inherit;
+}
+
 }

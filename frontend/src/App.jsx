@@ -3,6 +3,7 @@ import { api } from './api';
 import Connexion from './Connexion';
 import './App.css';
 import { QRCodeSVG } from 'qrcode.react';
+import Carte from './Carte';
 
 export default function App() {
   const [ecran, setEcran] = useState('recherche');
@@ -118,12 +119,11 @@ export default function App() {
           <h1 onClick={recommencer} style={{ cursor: 'pointer' }}>MeRoMbe</h1>
           <p className="sous-titre">Reservez votre place, sans faire la queue</p>
         </div>
-        {jeton && (
-          <div className="compte">
-            <button className="lien" onClick={voirBillets}>Mes billets</button>
-            <button className="lien" onClick={deconnecter}>Deconnexion</button>
-          </div>
-        )}
+        <div className="compte">
+          <button className="lien" onClick={() => setEcran('carte')}>Agences proches</button>
+          {jeton && <button className="lien" onClick={voirBillets}>Mes billets</button>}
+          {jeton && <button className="lien" onClick={deconnecter}>Deconnexion</button>}
+        </div>
       </header>
 
       {erreur && <p className="erreur">{erreur}</p>}
@@ -203,6 +203,10 @@ export default function App() {
 
       {ecran === 'billets' && (
         <MesBillets billets={billets} surRetour={recommencer} />
+      )}
+
+      {ecran === 'carte' && (
+        <Carte surRetour={() => setEcran('recherche')} />
       )}
     </div>
   );
