@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from './api';
 import Connexion from './Connexion';
 import './App.css';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function App() {
   const [ecran, setEcran] = useState('recherche');
@@ -278,7 +279,10 @@ function Paiement({ reservation, paiement, chargement, surPaiement, surBillets }
 }
 
 function MesBillets({ billets, surRetour }) {
+  const [ouvert, setOuvert] = useState(null);
+
   if (!billets) return <p className="vide">Chargement...</p>;
+
   if (billets.length === 0) {
     return (
       <div className="carte">
@@ -303,6 +307,22 @@ function MesBillets({ billets, surRetour }) {
             <p className="details-billet">
               {b.nbPlaces} place(s) — {b.montant.toLocaleString('fr-FR')} FCFA
             </p>
+
+            {ouvert === b.code ? (
+              <div className="qr-zone">
+                <QRCodeSVG value={b.qr} size={200} level="M" />
+                <p className="qr-aide">Presentez ce code a l'embarquement</p>
+                <button className="lien" onClick={() => setOuvert(null)}>
+                  Masquer
+                </button>
+              </div>
+            ) : (
+              b.statut === 'valide' && (
+                <button className="lien" onClick={() => setOuvert(b.code)}>
+                  Afficher le QR code
+                </button>
+              )
+            )}
           </li>
         ))}
       </ul>

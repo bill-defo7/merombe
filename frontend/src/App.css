@@ -306,4 +306,22 @@ header h1 {
   color: var(--gris);
 }
 
+.qr-zone {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 18px;
+  background: white;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+}
+
+.qr-aide {
+  margin: 0 !important;
+  font-size: 0.8rem !important;
+  color: var(--gris);
+  text-align: center;
+}
+
 }
