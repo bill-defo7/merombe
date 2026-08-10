@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { api } from './api';
+import BackOffice from './BackOffice';
+import { api, lireJeton } from './api';
 import Connexion from './Connexion';
 import './App.css';
 import { QRCodeSVG } from 'qrcode.react';
 import Carte from './Carte';
+
 
 export default function App() {
   const [ecran, setEcran] = useState('recherche');
@@ -24,6 +26,9 @@ export default function App() {
 
   const [erreur, setErreur] = useState(null);
   const [chargement, setChargement] = useState(false);
+
+  const utilisateur = lireJeton();
+  const estAgence = utilisateur && ['guichetier', 'agent', 'admin'].includes(utilisateur.role);
 
   useEffect(() => {
     api.villes().then(setVilles).catch((e) => setErreur(e.message));
@@ -110,6 +115,21 @@ export default function App() {
     setPaiement(null);
     setResultats(null);
     setEcran('recherche');
+  }
+
+  if (estAgence) {
+    return (
+      <div className="page">
+        <header className="entete">
+          <div>
+            <h1>MeRoMbe <span className="badge">agence</span></h1>
+            <p className="sous-titre">Espace {utilisateur.role}</p>
+          </div>
+          <button className="lien" onClick={deconnecter}>Deconnexion</button>
+        </header>
+        <BackOffice />
+      </div>
+    );
   }
 
   return (

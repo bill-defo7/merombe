@@ -346,4 +346,105 @@ header h1 {
   font-family: inherit;
 }
 
+.onglets {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--bordure);
+}
+
+.onglets button {
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--gris);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.onglets button.actif {
+  color: var(--vert);
+  border-bottom-color: var(--vert);
+}
+
+.chiffres {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.chiffre {
+  background: white;
+  padding: 18px;
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+}
+
+.valeur {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--vert);
+}
+
+.unite {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.libelle {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--gris);
+}
+
+.jauge {
+  height: 6px;
+  margin: 10px 0;
+  background: var(--bordure);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.remplissage {
+  height: 100%;
+  background: var(--vert);
+}
+
+.passagers {
+  list-style: none;
+  padding: 12px 0 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.passagers li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.succes {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: var(--vert-clair);
+  border-radius: 8px;
+  color: var(--vert);
+  font-size: 0.9rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--vert);
+  background: var(--vert-clair);
+  padding: 4px 10px;
+  border-radius: 99px;
+  vertical-align: middle;
+}
+
 }

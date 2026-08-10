@@ -167,4 +167,17 @@ public class AgenceBackOfficeController {
                 "departsAVenir", aVenir.size(),
                 "tauxRemplissage", offertes == 0 ? 0 : Math.round(vendues * 100.0 / offertes));
     }
+
+    @GetMapping("/locaux")
+    @Transactional
+    public List<Map<String, Object>> mesLocaux() {
+        Integer agenceId = contexte.agenceCourante().getId();
+        return locaux.findAll().stream()
+                .filter(l -> l.getAgence().getId().equals(agenceId))
+                .map(l -> Map.<String, Object>of(
+                        "id", l.getId(),
+                        "quartier", l.getQuartier(),
+                        "ville", l.getVille().getNom()))
+                .toList();
+    }
 }
