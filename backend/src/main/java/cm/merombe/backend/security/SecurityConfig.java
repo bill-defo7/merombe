@@ -22,6 +22,15 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain chaineDeSecurite(HttpSecurity http) throws Exception {
         http
+            .cors(c -> c.configurationSource(request -> {
+                var config = new org.springframework.web.cors.CorsConfiguration();
+                config.setAllowedOriginPatterns(java.util.List.of(
+                        "http://localhost:5173",
+                        "https://*.vercel.app"));
+                config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedHeaders(java.util.List.of("*"));
+                return config;
+            }))
             // API sans formulaire HTML : la protection CSRF ne s'applique pas
             .csrf(csrf -> csrf.disable())
 

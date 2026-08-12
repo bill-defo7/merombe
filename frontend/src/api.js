@@ -1,7 +1,8 @@
 // Toutes les communications avec le back-end passent par ici.
 // Un seul endroit a modifier le jour ou l'adresse change.
 
-const BASE = '/api';
+//const BASE = '/api';
+const BASE = (import.meta.env.VITE_API_URL || '') + '/api';
 
 async function appeler(chemin, options = {}) {
   const jeton = localStorage.getItem('merombe_jeton');
