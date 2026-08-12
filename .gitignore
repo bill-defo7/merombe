@@ -28,3 +28,5 @@ application-local.properties
 .paul
 .agent
 .jeton
+
+backend/.env
