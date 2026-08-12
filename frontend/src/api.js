@@ -76,6 +76,12 @@ export const api = {
       body: JSON.stringify({ code }),
     }),  
 
+  controlerQr: (qr) =>
+    appeler('/billets/controler', {
+      method: 'POST',
+      body: JSON.stringify({ qr }),
+    }),
+
   mesBillets: () => appeler('/billets/mes-billets'),
 
   // --- back-office agence ---

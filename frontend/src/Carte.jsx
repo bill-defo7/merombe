@@ -97,8 +97,19 @@ export default function Carte({ surRetour }) {
             attribution='&copy; OpenStreetMap'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <Marker position={position} icon={marqueurMoi}>
-            <Popup>Vous etes ici</Popup>
+          <Marker
+            position={position}
+            icon={marqueurMoi}
+            draggable={true}
+            eventHandlers={{
+              dragend: (e) => {
+                const p = e.target.getLatLng();
+                setPosition([p.lat, p.lng]);
+                charger(p.lat, p.lng);
+              },
+            }}
+          >
+            <Popup>Deplacez ce point pour ajuster votre position</Popup>
           </Marker>
           {(locaux || []).map((l) => (
             <Marker key={l.id} position={[l.latitude, l.longitude]} icon={marqueurAgence}>
@@ -113,6 +124,10 @@ export default function Carte({ surRetour }) {
           ))}
         </MapContainer>
       </div>
+
+      <p className="info" style={{ textAlign: 'center', marginTop: -8, marginBottom: 20 }}>
+        Position approximative ? Deplacez le point bleu sur la carte.
+      </p>
 
       {locaux && locaux.length > 0 && (
         <>
