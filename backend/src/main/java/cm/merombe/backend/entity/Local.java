@@ -25,6 +25,12 @@ public class Local {
     @Column(length = 120)
     private String quartier;
 
+    @Column(length = 200)
+    private String adresse;
+
+    @Column(length = 20)
+    private String telephone;
+
     // GEOGRAPHY et non GEOMETRY : les distances sortent en metres
     // sur la sphere terrestre, pas sur un plan
     @JdbcTypeCode(SqlTypes.GEOGRAPHY)
@@ -43,4 +49,6 @@ public class Local {
     public void setQuartier(String quartier) { this.quartier = quartier; }
     public Point getPosition() { return position; }
     public void setPosition(Point position) { this.position = position; }
+    public String getAdresse() { return adresse; }
+    public String getTelephone() { return telephone; }
 }

@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { api } from './api';
+import './App.css';
 
-/**
- * Connexion en deux temps : on demande un code par SMS,
- * puis on le verifie. Le jeton obtenu est conserve dans le navigateur.
- */
 export default function Connexion({ surConnexion, surAnnulation }) {
   const [etape, setEtape] = useState('telephone');
-  const [telephone, setTelephone] = useState('');
+  const [telephone, setTelephone] = useState('+237');
   const [code, setCode] = useState('');
   const [erreur, setErreur] = useState(null);
   const [chargement, setChargement] = useState(false);
@@ -43,55 +40,83 @@ export default function Connexion({ surConnexion, surAnnulation }) {
   }
 
   return (
-    <div className="carte">
-      <h2>Connexion</h2>
-
+    <div className="bloc">
       {etape === 'telephone' ? (
-        <form onSubmit={envoyerCode} className="recherche">
-          <label>
-            Numero de telephone
-            <input
-              type="tel"
-              placeholder="+237690000000"
-              value={telephone}
-              onChange={(e) => setTelephone(e.target.value)}
-              required
-            />
-          </label>
-          <button type="submit" disabled={chargement}>
-            {chargement ? 'Envoi...' : 'Recevoir un code'}
-          </button>
-        </form>
-      ) : (
-        <form onSubmit={validerCode} className="recherche">
-          <p className="info">
-            Un code a ete envoye au {telephone}.
+        <>
+          <h2>Connexion</h2>
+          <p className="bloc-soustitre">
+            Entrez votre numero, nous vous enverrons un code de verification
           </p>
-          <label>
-            Code a 6 chiffres
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              placeholder="000000"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              required
-            />
-          </label>
-          <button type="submit" disabled={chargement}>
-            {chargement ? 'Verification...' : 'Se connecter'}
-          </button>
-          <button type="button" className="lien" onClick={() => setEtape('telephone')}>
+
+          <form onSubmit={envoyerCode}>
+            <label className="champ" style={{ marginBottom: 18 }}>
+              <span>Numero de telephone</span>
+              <input
+                type="tel"
+                placeholder="+237 6XX XX XX XX"
+                value={telephone}
+                onChange={(e) => setTelephone(e.target.value)}
+                autoFocus
+                required
+              />
+            </label>
+
+            {erreur && <p className="erreur">{erreur}</p>}
+
+            <button type="submit" className="bouton large" disabled={chargement}>
+              {chargement ? 'Envoi en cours...' : 'Recevoir mon code'}
+            </button>
+          </form>
+
+          <p className="info" style={{ marginTop: 18, marginBottom: 0, fontSize: '0.82rem' }}>
+            Premiere visite ? Votre compte est cree automatiquement.
+          </p>
+        </>
+      ) : (
+        <>
+          <h2>Verification</h2>
+          <p className="bloc-soustitre">
+            Un code a 6 chiffres a ete envoye au {telephone}
+          </p>
+
+          <form onSubmit={validerCode}>
+            <label className="champ" style={{ marginBottom: 18 }}>
+              <span>Code de verification</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="000000"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                autoFocus
+                required
+                style={{
+                  fontSize: '1.5rem',
+                  letterSpacing: '0.5em',
+                  textAlign: 'center',
+                  fontFamily: 'ui-monospace, monospace',
+                }}
+              />
+            </label>
+
+            {erreur && <p className="erreur">{erreur}</p>}
+
+            <button type="submit" className="bouton large" disabled={chargement}>
+              {chargement ? 'Verification...' : 'Se connecter'}
+            </button>
+          </form>
+
+          <button className="lien" onClick={() => { setEtape('telephone'); setCode(''); }}
+                  style={{ display: 'block', margin: '12px auto 0' }}>
             Changer de numero
           </button>
-        </form>
+        </>
       )}
 
-      {erreur && <p className="erreur">{erreur}</p>}
-
-      <button type="button" className="lien" onClick={surAnnulation}>
-        Retour a la recherche
+      <button className="lien" onClick={surAnnulation}
+              style={{ display: 'block', margin: '6px auto 0', color: 'var(--gris)' }}>
+        Retour
       </button>
     </div>
   );

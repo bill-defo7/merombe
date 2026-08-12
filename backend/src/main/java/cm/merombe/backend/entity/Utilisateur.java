@@ -29,6 +29,13 @@ public class Utilisateur {
     protected Utilisateur() {
     }
 
+    /** Compte cree automatiquement a la premiere connexion. */
+    public Utilisateur(String telephone) {
+        this.telephone = telephone;
+        this.nom = "Voyageur " + telephone.substring(Math.max(0, telephone.length() - 4));
+        this.role = "voyageur";
+    }
+
     public Integer getId() { return id; }
     public Agence getAgence() { return agence; }
     public void setAgence(Agence agence) { this.agence = agence; }

@@ -25,8 +25,10 @@ public interface DepartRepository extends JpaRepository<Depart, Integer> {
     @Query("""
             SELECT new cm.merombe.backend.dto.DepartRechercheDto(
                 d.id, d.dateDepart, h.heure, h.heureGarantie,
-                a.nom, ld.quartier, vd.nom, va.nom,
-                h.tarif, d.placesDispo, l.dureeEstimee)
+                a.id, a.nom, a.logoUrl, a.note,
+                ld.quartier, ld.adresse, vd.nom, va.nom,
+                h.tarif, d.placesDispo, l.dureeEstimee,
+                h.categorie, h.climatise, h.wifi, h.priseUsb, h.photoBus)
             FROM Depart d
             JOIN d.horaire h
             JOIN h.liaison l

@@ -70,6 +70,12 @@ export const api = {
       body: JSON.stringify({ reservationId, moyen }),
     }),
 
+  controlerBillet: (code) =>
+    appeler('/billets/controler', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    }),  
+
   mesBillets: () => appeler('/billets/mes-billets'),
 
   // --- back-office agence ---

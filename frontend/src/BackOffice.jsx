@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { api } from './api';
+import './App.css';
 
-export default function BackOffice({ surDeconnexion }) {
+export default function BackOffice() {
   const [onglet, setOnglet] = useState('tableau');
 
   return (
@@ -22,6 +23,8 @@ export default function BackOffice({ surDeconnexion }) {
   );
 }
 
+/* ==================== Tableau de bord ==================== */
+
 function Tableau() {
   const [chiffres, setChiffres] = useState(null);
   const [erreur, setErreur] = useState(null);
@@ -31,17 +34,26 @@ function Tableau() {
   }, []);
 
   if (erreur) return <p className="erreur">{erreur}</p>;
-  if (!chiffres) return <p className="vide">Chargement...</p>;
+  if (!chiffres) return <p className="chargement">Chargement...</p>;
 
   return (
     <>
-      <h2 className="titre-section">{chiffres.agence}</h2>
+      <h1 className="titre-page">{chiffres.agence}</h1>
+
       <div className="chiffres">
         <Chiffre valeur={chiffres.recettesFCFA.toLocaleString('fr-FR')}
                  unite="FCFA" libelle="Recettes encaissees" />
         <Chiffre valeur={chiffres.placesPayees} libelle="Places vendues" />
         <Chiffre valeur={chiffres.departsAVenir} libelle="Departs a venir" />
         <Chiffre valeur={chiffres.tauxRemplissage} unite="%" libelle="Taux de remplissage" />
+      </div>
+
+      <div className="bloc">
+        <h2>Vos prochaines echeances</h2>
+        <p className="bloc-soustitre">
+          {chiffres.reservationsConfirmees} reservation(s) confirmee(s) a ce jour.
+          Les departs se generent automatiquement chaque nuit a partir de vos horaires.
+        </p>
       </div>
     </>
   );
@@ -57,6 +69,8 @@ function Chiffre({ valeur, unite, libelle }) {
     </div>
   );
 }
+
+/* ==================== Departs et passagers ==================== */
 
 function Departs() {
   const [departs, setDeparts] = useState(null);
@@ -85,41 +99,70 @@ function Departs() {
   }
 
   if (erreur) return <p className="erreur">{erreur}</p>;
-  if (!departs) return <p className="vide">Chargement...</p>;
+  if (!departs) return <p className="chargement">Chargement...</p>;
+  if (departs.length === 0) {
+    return (
+      <div className="bloc">
+        <h2>Aucun depart</h2>
+        <p className="bloc-soustitre">
+          Declarez vos liaisons et horaires dans l'onglet « Mon offre »,
+          puis generez les departs.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
-      <h2 className="titre-section">Departs a venir</h2>
-      <ul className="resultats">
+      <div className="entete-resultats" style={{ marginTop: 0 }}>
+        <h2>Departs a venir</h2>
+        <span className="compteur">{departs.length} programme(s)</span>
+      </div>
+
+      <ul className="liste">
         {departs.map((d) => {
           const vendues = d.placesTotal - d.placesDispo;
+          const taux = Math.round((vendues / d.placesTotal) * 100);
           return (
-            <li key={d.departId} className="billet">
-              <div className="billet-entete">
-                <span className="code">{d.dateDepart} · {d.heure.slice(0, 5)}</span>
-                <span className="etat">{d.villeArrivee}</span>
-              </div>
-              <p className="details-billet">
-                {vendues} / {d.placesTotal} place(s) — {d.tarif.toLocaleString('fr-FR')} FCFA
-              </p>
-              <div className="jauge">
-                <div className="remplissage"
-                     style={{ width: `${(vendues / d.placesTotal) * 100}%` }} />
+            <li key={d.departId} className="depart-agence">
+              <div className="depart-agence-haut">
+                <div>
+                  <div className="depart-date">{formaterDate(d.dateDepart)}</div>
+                  <div className="depart-info">
+                    {d.heure.slice(0, 5)} · {d.villeArrivee}
+                  </div>
+                </div>
+                <div className="depart-prix">
+                  {d.tarif.toLocaleString('fr-FR')} F
+                </div>
               </div>
 
-              <button className="lien" onClick={() => voirPassagers(d.departId)}>
-                {ouvert === d.departId ? 'Masquer' : 'Voir les passagers'}
+              <div className="depart-remplissage">
+                <span>{vendues} / {d.placesTotal} places</span>
+                <span className={taux >= 80 ? 'fort' : ''}>{taux} %</span>
+              </div>
+              <div className="jauge">
+                <div className="remplissage" style={{ width: `${taux}%` }} />
+              </div>
+
+              <button className="lien" onClick={() => voirPassagers(d.departId)}
+                      style={{ padding: '8px 0' }}>
+                {ouvert === d.departId ? 'Masquer la liste' : 'Voir les passagers'}
               </button>
 
               {ouvert === d.departId && (
                 <ul className="passagers">
                   {(passagers[d.departId] || []).length === 0 ? (
-                    <li className="vide">Aucun passager pour l'instant.</li>
+                    <li style={{ color: 'var(--gris)', borderBottom: 'none' }}>
+                      Aucun passager pour l'instant.
+                    </li>
                   ) : (
                     passagers[d.departId].map((p) => (
                       <li key={p.reservationId}>
-                        <strong>{p.nom}</strong> — {p.telephone}
-                        <span className={`etat ${p.statut}`}>{p.statut}</span>
+                        <strong style={{ flex: 1 }}>{p.nom}</strong>
+                        <span style={{ color: 'var(--gris)' }}>{p.telephone}</span>
+                        <span>{p.nbPlaces} pl.</span>
+                        <span className={`badge-statut ${p.statut}`}>{p.statut}</span>
                       </li>
                     ))
                   )}
@@ -133,9 +176,11 @@ function Departs() {
   );
 }
 
+/* ==================== Offre ==================== */
+
 function Offre() {
-  const [liaisons, setLiaisons] = useState([]);
-  const [horaires, setHoraires] = useState([]);
+  const [liaisons, setLiaisons] = useState(null);
+  const [horaires, setHoraires] = useState(null);
   const [message, setMessage] = useState(null);
   const [erreur, setErreur] = useState(null);
   const [chargement, setChargement] = useState(false);
@@ -157,7 +202,9 @@ function Offre() {
     setChargement(true);
     try {
       const r = await api.genererDeparts();
-      setMessage(`${r.crees} depart(s) genere(s) pour les 14 prochains jours.`);
+      setMessage(r.crees === 0
+        ? 'Vos departs sont deja a jour pour les 14 prochains jours.'
+        : `${r.crees} depart(s) genere(s) pour les 14 prochains jours.`);
     } catch (e) {
       setErreur(e.message);
     } finally {
@@ -165,55 +212,76 @@ function Offre() {
     }
   }
 
+  if (!liaisons || !horaires) return <p className="chargement">Chargement...</p>;
+
   return (
     <>
-      <h2 className="titre-section">Mes liaisons</h2>
+      <div className="entete-resultats" style={{ marginTop: 0 }}>
+        <h2>Vos liaisons</h2>
+        <span className="compteur">{liaisons.length} declaree(s)</span>
+      </div>
+
       {liaisons.length === 0 ? (
         <p className="vide">Aucune liaison declaree.</p>
       ) : (
-        <ul className="resultats">
+        <ul className="liste">
           {liaisons.map((l) => (
-            <li key={l.id} className="depart">
-              <div className="details">
-                <strong>{l.quartierDepart}, {l.villeDepart} → {l.villeArrivee}</strong>
-                <span>{l.dureeEstimee ? `${l.dureeEstimee} min estimees` : 'duree non precisee'}</span>
+            <li key={l.id} className="ligne-offre">
+              <div>
+                <strong>{l.villeDepart} → {l.villeArrivee}</strong>
+                <span>Depart de {l.quartierDepart}</span>
               </div>
+              <span className="duree">
+                {l.dureeEstimee ? `${Math.floor(l.dureeEstimee / 60)}h${String(l.dureeEstimee % 60).padStart(2, '0')}` : '—'}
+              </span>
             </li>
           ))}
         </ul>
       )}
 
-      <h2 className="titre-section" style={{ marginTop: 28 }}>Mes horaires</h2>
+      <div className="entete-resultats">
+        <h2>Vos horaires</h2>
+        <span className="compteur">{horaires.length} declare(s)</span>
+      </div>
+
       {horaires.length === 0 ? (
         <p className="vide">Aucun horaire declare.</p>
       ) : (
-        <ul className="resultats">
+        <ul className="liste">
           {horaires.map((h) => (
-            <li key={h.id} className="depart">
-              <div className="heure">{h.heure.slice(0, 5)}</div>
-              <div className="details">
+            <li key={h.id} className="ligne-horaire">
+              <div className="horaire-heure">{h.heure.slice(0, 5)}</div>
+              <div>
                 <strong>{h.villeArrivee}</strong>
-                <span>{h.jours === 'tous' ? 'tous les jours' : h.jours}</span>
-                <span className="places">{h.places} place(s) par depart</span>
+                <span>{h.jours === 'tous' ? 'Tous les jours' : h.jours}</span>
               </div>
-              <div className="tarif">{h.tarif.toLocaleString('fr-FR')} FCFA</div>
+              <div className="horaire-droite">
+                <div className="horaire-tarif">{h.tarif.toLocaleString('fr-FR')} F</div>
+                <span>{h.places} places</span>
+              </div>
             </li>
           ))}
         </ul>
       )}
 
-      <div className="carte" style={{ marginTop: 24 }}>
-        <p className="info">
-          Les departs des prochains jours sont generes automatiquement
-          chaque nuit a partir de vos horaires.
+      <div className="bloc" style={{ marginTop: 28 }}>
+        <h2>Generation des departs</h2>
+        <p className="bloc-soustitre">
+          Les departs des 14 prochains jours sont crees automatiquement
+          chaque nuit a partir de vos horaires. Vous pouvez aussi les
+          generer maintenant.
         </p>
-        <button onClick={genererDeparts} disabled={chargement}>
+        {message && <p className="succes">{message}</p>}
+        {erreur && <p className="erreur">{erreur}</p>}
+        <button className="bouton discret large" onClick={genererDeparts} disabled={chargement}>
           {chargement ? 'Generation...' : 'Generer maintenant'}
         </button>
       </div>
-
-      {message && <p className="succes">{message}</p>}
-      {erreur && <p className="erreur">{erreur}</p>}
     </>
   );
+}
+
+function formaterDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 }

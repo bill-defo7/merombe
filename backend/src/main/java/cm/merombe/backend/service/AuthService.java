@@ -59,9 +59,14 @@ public class AuthService {
         // un code ne sert qu'une seule fois
         enregistre.setUtilise(true);
 
-        Optional<Utilisateur> trouve = utilisateurs.findByTelephone(telephone);
-        Utilisateur utilisateur = trouve.orElseThrow(() ->
-                new IllegalArgumentException("Aucun compte pour ce numero"));
+        // premier passage : on cree le compte voyageur.
+        // Le numero de telephone suffit, pas d'inscription separee.
+        Utilisateur utilisateur = utilisateurs.findByTelephone(telephone)
+                .orElseGet(() -> {
+                    Utilisateur nouveau = new Utilisateur(telephone);
+                    System.out.println(">>> Nouveau compte voyageur : " + telephone);
+                    return utilisateurs.save(nouveau);
+                });
 
         return jwtService.genererJeton(
                 utilisateur.getId(), utilisateur.getTelephone(), utilisateur.getRole());

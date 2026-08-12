@@ -34,6 +34,19 @@ public class Horaire {
     @Column(name = "heure_garantie", nullable = false)
     private boolean heureGarantie = true;
 
+    // 'classique', 'confort' ou 'vip'
+    @Column(length = 20)
+    private String categorie = "classique";
+
+    @Column(name = "photo_bus", length = 300)
+    private String photoBus;
+
+    private boolean climatise;
+    private boolean wifi;
+
+    @Column(name = "prise_usb")
+    private boolean priseUsb;
+
     protected Horaire() {
     }
 
@@ -60,4 +73,9 @@ public class Horaire {
     public void setTarif(Integer tarif) { this.tarif = tarif; }
     public boolean isHeureGarantie() { return heureGarantie; }
     public void setHeureGarantie(boolean heureGarantie) { this.heureGarantie = heureGarantie; }
+    public String getCategorie() { return categorie; }
+    public String getPhotoBus() { return photoBus; }
+    public boolean isClimatise() { return climatise; }
+    public boolean isWifi() { return wifi; }
+    public boolean isPriseUsb() { return priseUsb; }
 }

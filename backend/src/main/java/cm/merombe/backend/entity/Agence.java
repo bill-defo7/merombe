@@ -24,6 +24,17 @@ public class Agence {
     @Column(nullable = false, length = 20)
     private String statut;
 
+    @Column(name = "logo_url", length = 300)
+    private String logoUrl;
+
+    @Column(name = "photo_url", length = 300)
+    private String photoUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    private java.math.BigDecimal note;
+
     protected Agence() {
     }
 
@@ -36,4 +47,8 @@ public class Agence {
     public void setContact(String contact) { this.contact = contact; }
     public String getStatut() { return statut; }
     public void setStatut(String statut) { this.statut = statut; }
+    public String getLogoUrl() { return logoUrl; }
+    public String getPhotoUrl() { return photoUrl; }
+    public String getDescription() { return description; }
+    public java.math.BigDecimal getNote() { return note; }
 }
