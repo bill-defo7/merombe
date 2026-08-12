@@ -1,18 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { api } from './api';
-import './App.css';
-import { useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { api } from './api';
+import BilletPdf from './BilletPdf';
+import './App.css';
 
-/** Capture le billet affiche et l'enregistre en PDF. */
+/** Capture le titre de transport et l'enregistre en PDF A5. */
 async function telecharger(element, code) {
-  const image = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
-  const pdf = new jsPDF({ unit: 'mm', format: [100, 150] });
-  const largeur = 90;
+  if (!element) return;
+  const image = await html2canvas(element, {
+    scale: 2.5,
+    backgroundColor: '#ffffff',
+    useCORS: true,
+  });
+  const pdf = new jsPDF({ unit: 'mm', format: 'a5', orientation: 'portrait' });
+  const marge = 10;
+  const largeur = 148 - marge * 2;
   const hauteur = (image.height / image.width) * largeur;
-  pdf.addImage(image.toDataURL('image/png'), 'PNG', 5, 8, largeur, hauteur);
+  pdf.addImage(image.toDataURL('image/png'), 'PNG', marge, marge, largeur, hauteur);
   pdf.save(`billet-${code}.pdf`);
 }
 
@@ -47,6 +53,7 @@ export default function Billets({ surRetour }) {
   return (
     <>
       <h1 className="titre-page">Mes billets</h1>
+
       <ul className="liste">
         {billets.map((b) => (
           <li key={b.code} className="billet">
@@ -55,27 +62,28 @@ export default function Billets({ surRetour }) {
               <span className="billet-etat">{b.statut}</span>
             </div>
             <div className="billet-corps">
-              <div className="billet-trajet">{b.destination}</div>
+              <div className="billet-trajet">{b.villeDepart} → {b.destination}</div>
               <div className="billet-detail">
                 {formaterDate(b.dateDepart)} a {b.heure.slice(0, 5)}
               </div>
               <div className="billet-detail">
-                {b.nbPlaces} place(s) — {b.montant.toLocaleString('fr-FR')} FCFA
+                {b.agence} · {b.nbPlaces} place(s) — {b.montant.toLocaleString('fr-FR')} FCFA
               </div>
 
               {b.statut === 'valide' && (
                 ouvert === b.code ? (
                   <>
-                    <div className="qr-zone" ref={(el) => (zones.current[b.code] = el)}>
+                    <div className="qr-zone">
                       <QRCodeSVG value={b.qr} size={190} level="M" />
                       <p className="qr-aide">Presentez ce code a l'embarquement</p>
-                      <p className="qr-aide" style={{ fontWeight: 600, color: 'var(--encre)' }}>
-                        {b.code} · {b.destination} · {b.dateDepart}
-                      </p>
                     </div>
                     <button className="bouton discret large" style={{ marginTop: 12 }}
                             onClick={() => telecharger(zones.current[b.code], b.code)}>
                       Telecharger le billet
+                    </button>
+                    <button className="lien" onClick={() => setOuvert(null)}
+                            style={{ display: 'block', margin: '8px auto 0' }}>
+                      Masquer
                     </button>
                   </>
                 ) : (
@@ -89,10 +97,19 @@ export default function Billets({ surRetour }) {
           </li>
         ))}
       </ul>
+
       <button className="lien" onClick={surRetour}
               style={{ display: 'block', margin: '20px auto 0' }}>
         Rechercher un autre trajet
       </button>
+
+      {/* Rendu hors ecran : c'est cette mise en page qui part dans le PDF */}
+      <div className="tt-hors-ecran">
+        {billets.map((b) => (
+          <BilletPdf key={b.code} billet={b}
+                     reference={(el) => (zones.current[b.code] = el)} />
+        ))}
+      </div>
     </>
   );
 }

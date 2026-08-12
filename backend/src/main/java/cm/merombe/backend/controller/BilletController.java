@@ -91,14 +91,34 @@ public class BilletController {
 
     private Map<String, Object> decrire(Billet b) {
         Reservation r = b.getReservation();
-        return Map.of(
-                "code", b.getCode(),
-                "qr", b.getQrSigne(),
-                "statut", b.getStatut(),
-                "nbPlaces", r.getNbPlaces(),
-                "montant", r.getMontant(),
-                "dateDepart", r.getDepart().getDateDepart().toString(),
-                "heure", r.getDepart().getHoraire().getHeure().toString(),
-                "destination", r.getDepart().getHoraire().getLiaison().getVilleArrivee().getNom());
+        var depart = r.getDepart();
+        var horaire = depart.getHoraire();
+        var liaison = horaire.getLiaison();
+        var local = liaison.getLocalDepart();
+
+        Map<String, Object> m = new java.util.HashMap<>();
+        m.put("code", b.getCode());
+        m.put("qr", b.getQrSigne());
+        m.put("statut", b.getStatut());
+        m.put("nbPlaces", r.getNbPlaces());
+        m.put("montant", r.getMontant());
+        m.put("tarifUnitaire", horaire.getTarif());
+        m.put("dateDepart", depart.getDateDepart().toString());
+        m.put("heure", horaire.getHeure().toString());
+        m.put("heureGarantie", horaire.isHeureGarantie());
+        m.put("destination", liaison.getVilleArrivee().getNom());
+        m.put("villeDepart", local.getVille().getNom());
+        m.put("quartierDepart", local.getQuartier());
+        m.put("adresseDepart", local.getAdresse() == null ? "" : local.getAdresse());
+        m.put("telephoneLocal", local.getTelephone() == null ? "" : local.getTelephone());
+        m.put("agence", local.getAgence().getNom());
+        m.put("contactAgence", local.getAgence().getContact() == null
+                ? "" : local.getAgence().getContact());
+        m.put("categorie", horaire.getCategorie());
+        m.put("voyageur", r.getVoyageur().getNom());
+        m.put("telephoneVoyageur", r.getVoyageur().getTelephone());
+        m.put("reserveLe", r.getCreeLe().toString());
+        m.put("dureeEstimee", liaison.getDureeEstimee() == null ? 0 : liaison.getDureeEstimee());
+        return m;
     }
 }

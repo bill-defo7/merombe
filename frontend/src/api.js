@@ -110,4 +110,24 @@ export const api = {
   genererDeparts: () => appeler('/agence/generer-departs', { method: 'POST' }),
 
   mesLocaux: () => appeler('/agence/locaux'),
+
+  // --- administration ---
+  synthese: () => appeler('/admin/synthese'),
+
+  agencesAdmin: (statut = '') =>
+    appeler(`/admin/agences${statut ? `?statut=${statut}` : ''}`),
+
+  changerStatutAgence: (id, statut) =>
+    appeler(`/admin/agences/${id}/statut`, {
+      method: 'POST',
+      body: JSON.stringify({ statut }),
+    }),
+
+  litiges: () => appeler('/admin/paiements-litiges'),
+
+  trancherLitige: (reference, decision) =>
+    appeler(`/admin/paiements-litiges/${reference}`, {
+      method: 'POST',
+      body: JSON.stringify({ decision }),
+    }),
 };

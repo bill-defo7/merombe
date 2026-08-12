@@ -24,4 +24,7 @@ public interface PaiementRepository extends JpaRepository<Paiement, Integer> {
               AND p.reference IS NOT NULL
             """)
     List<Paiement> trouverSansReponse(@Param("limite") LocalDateTime limite);
+
+    // paiements qui attendent un arbitrage humain
+    List<Paiement> findByStatutOrderByCreeLeDesc(String statut);
 }
