@@ -46,7 +46,7 @@ public class SecurityConfig {
 
                 // espaces reserves par role
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/agence/**").hasAnyRole("GUICHETIER", "ADMIN")
+                .requestMatchers("/api/agence/**").hasAnyRole("GUICHETIER", "RESPONSABLE", "ADMIN")
                 .requestMatchers("/api/embarquement/**").hasAnyRole("AGENT", "ADMIN")
 
                 // rappel de l'agregateur : appele par un serveur exterieur

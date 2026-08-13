@@ -27,6 +27,7 @@ public class AgenceBackOfficeController {
     private final GenerationDeparts generation;
     private final DepartRepository departs;
     private final ReservationRepository reservations;
+    private final UtilisateurRepository utilisateurs;
 
     public AgenceBackOfficeController(ContexteUtilisateur contexte,
                                       LiaisonRepository liaisons,
@@ -35,7 +36,8 @@ public class AgenceBackOfficeController {
                                       VilleRepository villes,
                                       GenerationDeparts generation,
                                       DepartRepository departs,
-                                      ReservationRepository reservations) {
+                                      ReservationRepository reservations,
+                                      UtilisateurRepository utilisateurs) {
         this.contexte = contexte;
         this.liaisons = liaisons;
         this.horaires = horaires;
@@ -44,6 +46,7 @@ public class AgenceBackOfficeController {
         this.generation = generation;
         this.departs = departs;
         this.reservations = reservations;
+        this.utilisateurs = utilisateurs;
     }
 
     @GetMapping("/liaisons")
@@ -179,5 +182,77 @@ public class AgenceBackOfficeController {
                         "quartier", l.getQuartier(),
                         "ville", l.getVille().getNom()))
                 .toList();
+    }
+
+    // --- gestion du personnel (reserve au responsable) ---
+
+    private void verifierResponsable() {
+        String role = contexte.utilisateurCourant().getRole();
+        if (!"responsable".equals(role) && !"admin".equals(role)) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Reserve au responsable de l'agence");
+        }
+    }
+
+    @GetMapping("/personnel")
+    public ResponseEntity<?> mesMembres() {
+        verifierResponsable();
+        Agence agence = contexte.agenceCourante();
+        List<Map<String, Object>> membres = utilisateurs
+                .findByAgenceIdOrderByRoleAscNomAsc(agence.getId()).stream()
+                .map(u -> Map.<String, Object>of(
+                        "id", u.getId(),
+                        "nom", u.getNom(),
+                        "telephone", u.getTelephone(),
+                        "role", u.getRole()))
+                .toList();
+        return ResponseEntity.ok(membres);
+    }
+
+    @PostMapping("/personnel")
+    @Transactional
+    public ResponseEntity<?> creerMembre(@RequestBody NouveauMembre demande) {
+        verifierResponsable();
+        Agence agence = contexte.agenceCourante();
+
+        if (demande.nom() == null || demande.nom().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("erreur", "nom requis"));
+        }
+        if (demande.telephone() == null || demande.telephone().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("erreur", "telephone requis"));
+        }
+        if (!List.of("guichetier", "agent").contains(demande.role())) {
+            return ResponseEntity.badRequest().body(Map.of("erreur", "role invalide"));
+        }
+        if (utilisateurs.findByTelephone(demande.telephone()).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("erreur", "ce telephone est deja utilise"));
+        }
+
+        Utilisateur membre = new Utilisateur(demande.telephone());
+        membre.setNom(demande.nom());
+        membre.setRole(demande.role());
+        membre.setAgence(agence);
+        utilisateurs.save(membre);
+
+        return ResponseEntity.ok(Map.of("id", membre.getId(), "message", "Membre ajoute"));
+    }
+
+    @DeleteMapping("/personnel/{id}")
+    @Transactional
+    public ResponseEntity<?> supprimerMembre(@PathVariable Integer id) {
+        verifierResponsable();
+        Agence agence = contexte.agenceCourante();
+
+        Utilisateur membre = utilisateurs.findById(id).orElse(null);
+        if (membre == null || membre.getAgence() == null
+                || !membre.getAgence().getId().equals(agence.getId())) {
+            return ResponseEntity.status(404).body(Map.of("erreur", "membre introuvable dans votre agence"));
+        }
+        if ("responsable".equals(membre.getRole())) {
+            return ResponseEntity.badRequest().body(Map.of("erreur", "impossible de supprimer un responsable"));
+        }
+
+        utilisateurs.delete(membre);
+        return ResponseEntity.ok(Map.of("message", "Membre retire"));
     }
 }

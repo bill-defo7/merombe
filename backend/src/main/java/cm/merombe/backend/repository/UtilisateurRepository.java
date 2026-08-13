@@ -13,4 +13,5 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Intege
     Optional<Utilisateur> trouverAvecAgence(@Param("id") Integer id);
     Optional<Utilisateur> findByTelephone(String telephone);
     List<Utilisateur> findByRole(String role);
+    List<Utilisateur> findByAgenceIdOrderByRoleAscNomAsc(Integer agenceId);
 }
