@@ -181,6 +181,8 @@ function Departs() {
 function Offre() {
   const [liaisons, setLiaisons] = useState(null);
   const [horaires, setHoraires] = useState(null);
+  const [locaux, setLocaux] = useState([]);
+  const [villes, setVilles] = useState([]);
   const [message, setMessage] = useState(null);
   const [erreur, setErreur] = useState(null);
   const [chargement, setChargement] = useState(false);
@@ -189,6 +191,8 @@ function Offre() {
     try {
       setLiaisons(await api.mesLiaisons());
       setHoraires(await api.mesHoraires());
+      setLocaux(await api.mesLocaux());
+      setVilles(await api.villes());
     } catch (e) {
       setErreur(e.message);
     }
@@ -239,6 +243,8 @@ function Offre() {
         </ul>
       )}
 
+      <FormulaireLiaison locaux={locaux} villes={villes} onCree={recharger} />
+
       <div className="entete-resultats">
         <h2>Vos horaires</h2>
         <span className="compteur">{horaires.length} declare(s)</span>
@@ -264,6 +270,8 @@ function Offre() {
         </ul>
       )}
 
+      <FormulaireHoraire liaisons={liaisons} onCree={recharger} />
+
       <div className="bloc" style={{ marginTop: 28 }}>
         <h2>Generation des departs</h2>
         <p className="bloc-soustitre">
@@ -279,6 +287,196 @@ function Offre() {
       </div>
     </>
   );
+}
+
+/* ---- formulaire : declarer une liaison ---- */
+
+function FormulaireLiaison({ locaux, villes, onCree }) {
+  const [localDepartId, setLocalDepartId] = useState('');
+  const [villeArriveeId, setVilleArriveeId] = useState('');
+  const [dureeEstimee, setDureeEstimee] = useState('');
+  const [erreur, setErreur] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [envoi, setEnvoi] = useState(false);
+
+  async function soumettre(e) {
+    e.preventDefault();
+    setErreur(null);
+    setMessage(null);
+
+    if (!localDepartId || !villeArriveeId) {
+      setErreur('Choisissez un local de depart et une ville d\'arrivee.');
+      return;
+    }
+
+    setEnvoi(true);
+    try {
+      await api.creerLiaison(
+        Number(localDepartId),
+        Number(villeArriveeId),
+        dureeEstimee ? Number(dureeEstimee) : null
+      );
+      setMessage('Liaison declaree avec succes.');
+      setLocalDepartId('');
+      setVilleArriveeId('');
+      setDureeEstimee('');
+      onCree();
+    } catch (e) {
+      setErreur(e.message);
+    } finally {
+      setEnvoi(false);
+    }
+  }
+
+  return (
+    <div className="bloc" style={{ marginTop: 12 }}>
+      <h2>Declarer une nouvelle liaison</h2>
+      <form onSubmit={soumettre} className="formulaire">
+        <label>
+          Local de depart
+          <select value={localDepartId} onChange={(e) => setLocalDepartId(e.target.value)}>
+            <option value="">-- choisir --</option>
+            {locaux.map((l) => (
+              <option key={l.id} value={l.id}>{l.ville} · {l.quartier}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Ville d'arrivee
+          <select value={villeArriveeId} onChange={(e) => setVilleArriveeId(e.target.value)}>
+            <option value="">-- choisir --</option>
+            {villes.map((v) => (
+              <option key={v.id} value={v.id}>{v.nom}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Duree estimee (en minutes, facultatif)
+          <input type="number" min="0" value={dureeEstimee}
+                 onChange={(e) => setDureeEstimee(e.target.value)}
+                 placeholder="ex : 240" />
+        </label>
+
+        {message && <p className="succes">{message}</p>}
+        {erreur && <p className="erreur">{erreur}</p>}
+
+        <button type="submit" className="bouton discret large" disabled={envoi}>
+          {envoi ? 'Envoi...' : 'Declarer la liaison'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+/* ---- formulaire : declarer un horaire ---- */
+
+function FormulaireHoraire({ liaisons, onCree }) {
+  const [liaisonId, setLiaisonId] = useState('');
+  const [heure, setHeure] = useState('');
+  const [jours, setJours] = useState('tous');
+  const [places, setPlaces] = useState('');
+  const [tarif, setTarif] = useState('');
+  const [heureGarantie, setHeureGarantie] = useState(true);
+  const [erreur, setErreur] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [envoi, setEnvoi] = useState(false);
+
+  async function soumettre(e) {
+    e.preventDefault();
+    setErreur(null);
+    setMessage(null);
+
+    if (!liaisonId || !heure || !places || !tarif) {
+      setErreur('Remplissez tous les champs obligatoires.');
+      return;
+    }
+
+    setEnvoi(true);
+    try {
+      await api.creerHoraire({
+        liaisonId: Number(liaisonId),
+        heure: heure.length === 5 ? `${heure}:00` : heure,
+        jours,
+        places: Number(places),
+        tarif: Number(tarif),
+        heureGarantie,
+      });
+      setMessage('Horaire declare avec succes.');
+      setHeure('');
+      setPlaces('');
+      setTarif('');
+      onCree();
+    } catch (e) {
+      setErreur(e.message);
+    } finally {
+      setEnvoi(false);
+    }
+  }
+
+  return (
+    <div className="bloc" style={{ marginTop: 12 }}>
+      <h2>Declarer un nouvel horaire</h2>
+      <form onSubmit={soumettre} className="formulaire">
+        <label>
+          Liaison
+          <select value={liaisonId} onChange={(e) => setLiaisonId(e.target.value)}>
+            <option value="">-- choisir --</option>
+            {liaisons.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.villeDepart} → {l.villeArrivee} ({l.quartierDepart})
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Heure de depart
+          <input type="time" value={heure} onChange={(e) => setHeure(e.target.value)} />
+        </label>
+
+        <label>
+          Jours
+          <select value={jours} onChange={(e) => setJours(e.target.value)}>
+            <option value="tous">Tous les jours</option>
+            <option value="ouvres">Jours ouvres (lun-ven)</option>
+            <option value="weekend">Week-end (sam-dim)</option>
+          </select>
+        </label>
+
+        <label>
+          Places disponibles
+          <input type="number" min="1" value={places}
+                 onChange={(e) => setPlaces(e.target.value)} placeholder="ex : 30" />
+        </label>
+
+        <label>
+          Tarif (FCFA)
+          <input type="number" min="0" value={tarif}
+                 onChange={(e) => setTarif(e.target.value)} placeholder="ex : 5000" />
+        </label>
+
+        <label className="ligne-case">
+          <input type="checkbox" checked={heureGarantie}
+                 onChange={(e) => setHeureGarantie(e.target.checked)} />
+          Heure garantie (le depart a lieu meme sans plein)
+        </label>
+
+        {message && <p className="succes">{message}</p>}
+        {erreur && <p className="erreur">{erreur}</p>}
+
+        <button type="submit" className="bouton discret large" disabled={envoi}>
+          {envoi ? 'Envoi...' : 'Declarer l\'horaire'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function formaterDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
 function formaterDate(iso) {

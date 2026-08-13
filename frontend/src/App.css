@@ -1399,3 +1399,28 @@ h1, h2, h3 {
   color: var(--gris-clair) !important;
   margin-bottom: 0 !important;
 }
+
+.formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 420px;
+}
+.formulaire label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--gris);
+}
+.formulaire input, .formulaire select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+}
+.formulaire .ligne-case {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
