@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
  *   - tout le reste       : succes apres confirmation
  */
 @Component
-@Profile("!production")
+// @Profile("!production")  // desactive temporairement : simulation active aussi en production
 public class PasserelleSimulee implements PasserellePaiement {
 
     private final Map<String, EtatPaiement> transactions = new ConcurrentHashMap<>();
