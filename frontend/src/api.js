@@ -143,4 +143,18 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ decision }),
     }),
+
+  // --- inscription publique d'une agence ---
+  inscrireAgence: (donnees) =>
+    appeler('/agences', {
+      method: 'POST',
+      body: JSON.stringify(donnees),
+    }),
+
+  // --- gestion des locaux (responsable) ---
+  creerLocal: (donnees) =>
+    appeler('/agence/locaux', {
+      method: 'POST',
+      body: JSON.stringify(donnees),
+    }),
 };

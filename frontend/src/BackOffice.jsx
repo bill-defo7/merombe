@@ -250,6 +250,28 @@ function Offre() {
         </ul>
       )}
 
+      <div className="entete-resultats">
+        <h2>Vos locaux</h2>
+        <span className="compteur">{locaux.length} declare(s)</span>
+      </div>
+
+      {locaux.length === 0 ? (
+        <p className="vide">Aucun local declare. Ajoutez votre premier point de depart ci-dessous.</p>
+      ) : (
+        <ul className="liste">
+          {locaux.map((l) => (
+            <li key={l.id} className="ligne-offre">
+              <div>
+                <strong>{l.quartier || l.ville}</strong>
+                <span>{l.ville}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <FormulaireLocal villes={villes} onCree={recharger} />
+
       <FormulaireLiaison locaux={locaux} villes={villes} onCree={recharger} />
 
       <div className="entete-resultats">
@@ -293,6 +315,130 @@ function Offre() {
         </button>
       </div>
     </>
+  );
+}
+
+/* ---- formulaire : ajouter un local (point de depart) ---- */
+
+function FormulaireLocal({ villes, onCree }) {
+  const [villeId, setVilleId] = useState('');
+  const [quartier, setQuartier] = useState('');
+  const [adresse, setAdresse] = useState('');
+  const [telephone, setTelephone] = useState('');
+  const [position, setPosition] = useState(null);
+  const [erreur, setErreur] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [envoi, setEnvoi] = useState(false);
+  const [localisation, setLocalisation] = useState(false);
+
+  function localiser() {
+    setErreur(null);
+    if (!navigator.geolocation) {
+      setErreur("Votre navigateur ne permet pas la geolocalisation.");
+      return;
+    }
+    setLocalisation(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setPosition({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+        setLocalisation(false);
+      },
+      () => {
+        setErreur('Position indisponible. Vous pouvez reessayer.');
+        setLocalisation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
+  async function soumettre(e) {
+    e.preventDefault();
+    setErreur(null);
+    setMessage(null);
+
+    if (!villeId) {
+      setErreur('Choisissez une ville.');
+      return;
+    }
+    if (!position) {
+      setErreur('Localisez le local avant d\'enregistrer.');
+      return;
+    }
+
+    setEnvoi(true);
+    try {
+      await api.creerLocal({
+        villeId: Number(villeId),
+        quartier: quartier.trim() || null,
+        adresse: adresse.trim() || null,
+        telephone: telephone.trim() || null,
+        latitude: position.latitude,
+        longitude: position.longitude,
+      });
+      setMessage('Local ajoute avec succes.');
+      setQuartier('');
+      setAdresse('');
+      setTelephone('');
+      setPosition(null);
+      onCree();
+    } catch (e) {
+      setErreur(e.message);
+    } finally {
+      setEnvoi(false);
+    }
+  }
+
+  return (
+    <div className="bloc" style={{ marginTop: 12 }}>
+      <h2>Ajouter un local</h2>
+      <form onSubmit={soumettre} className="formulaire">
+        <label>
+          Ville
+          <select value={villeId} onChange={(e) => setVilleId(e.target.value)}>
+            <option value="">-- choisir --</option>
+            {villes.map((v) => (
+              <option key={v.id} value={v.id}>{v.nom}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Quartier (facultatif)
+          <input type="text" value={quartier} onChange={(e) => setQuartier(e.target.value)}
+                 placeholder="ex : Akwa" />
+        </label>
+
+        <label>
+          Adresse (facultatif)
+          <input type="text" value={adresse} onChange={(e) => setAdresse(e.target.value)}
+                 placeholder="ex : Rue de la gare" />
+        </label>
+
+        <label>
+          Telephone du local (facultatif)
+          <input type="tel" value={telephone} onChange={(e) => setTelephone(e.target.value)}
+                 placeholder="ex : +237677000000" />
+        </label>
+
+        <div>
+          <button type="button" className="bouton discret" onClick={localiser} disabled={localisation}>
+            {localisation ? 'Localisation...' : position ? 'Position enregistree ✓' : 'Localiser ce local'}
+          </button>
+          {position && (
+            <span style={{ fontSize: 13, color: 'var(--gris)', marginLeft: 10 }}>
+              {position.latitude.toFixed(4)}, {position.longitude.toFixed(4)}
+            </span>
+          )}
+        </div>
+
+        {message && <p className="succes">{message}</p>}
+        {erreur && <p className="erreur">{erreur}</p>}
+
+        <button type="submit" className="bouton discret large" disabled={envoi}>
+          {envoi ? 'Envoi...' : 'Ajouter le local'}
+        </button>
+      </form>
+    </div>
   );
 }
 

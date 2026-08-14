@@ -7,6 +7,7 @@ import Billets from './Billets';
 import './App.css';
 import Logo from './Logo';
 import Embarquement from './Embarquement';
+import Inscription from './Inscription';
 
 export default function App() {
   const [ecran, setEcran] = useState('accueil');
@@ -73,6 +74,9 @@ export default function App() {
             <button className="nav-lien" onClick={() => setEcran('carte')}>
               Agences proches
             </button>
+            <button className="nav-lien" onClick={() => setEcran('inscription')}>
+              Devenir partenaire
+            </button>
             {jeton ? (
               <>
                 <button className="nav-lien" onClick={() => setEcran('billets')}>
@@ -138,6 +142,12 @@ export default function App() {
       {ecran === 'carte' && (
         <div className="contenu">
           <Carte surRetour={() => setEcran('accueil')} />
+        </div>
+      )}
+
+      {ecran === 'inscription' && (
+        <div className="contenu">
+          <Inscription surRetour={() => setEcran('accueil')} />
         </div>
       )}
     </div>
