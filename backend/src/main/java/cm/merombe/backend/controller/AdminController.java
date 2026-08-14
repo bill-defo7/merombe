@@ -13,7 +13,9 @@ import cm.merombe.backend.entity.Paiement;
 import cm.merombe.backend.entity.Reservation;
 import cm.merombe.backend.paiement.EtatPaiement;
 import cm.merombe.backend.repository.*;
+import cm.merombe.backend.service.NotificationService;
 import cm.merombe.backend.service.PaiementService;
+import cm.merombe.backend.service.NotificationService;
 
 /**
  * Supervision de la plateforme. Reserve au role admin
@@ -29,7 +31,8 @@ public class AdminController {
     private final UtilisateurRepository utilisateurs;
     private final DepartRepository departs;
     private final BilletRepository billets;
-    private final PaiementService paiementService;
+   private final PaiementService paiementService;
+    private final NotificationService notifications;
 
     public AdminController(AgenceRepository agences,
                            PaiementRepository paiements,
@@ -37,7 +40,8 @@ public class AdminController {
                            UtilisateurRepository utilisateurs,
                            DepartRepository departs,
                            BilletRepository billets,
-                           PaiementService paiementService) {
+                           PaiementService paiementService,
+                           NotificationService notifications) {
         this.agences = agences;
         this.paiements = paiements;
         this.reservations = reservations;
@@ -45,6 +49,7 @@ public class AdminController {
         this.departs = departs;
         this.billets = billets;
         this.paiementService = paiementService;
+        this.notifications = notifications;
     }
 
     /** Chiffres generaux de la plateforme. */
@@ -96,7 +101,21 @@ public class AdminController {
             return ResponseEntity.status(404).body(Map.of("erreur", "agence inconnue"));
         }
 
+        String ancien = agence.getStatut();
         agence.setStatut(nouveau);
+
+        // notifie le responsable seulement si le statut change reellement
+        if (!nouveau.equals(ancien)) {
+            utilisateurs.findByAgenceIdAndRole(agence.getId(), "responsable")
+                    .ifPresent(responsable -> {
+                        if ("active".equals(nouveau)) {
+                            notifications.notifierActivationAgence(agence, responsable);
+                        } else if ("suspendue".equals(nouveau)) {
+                            notifications.notifierSuspensionAgence(agence, responsable);
+                        }
+                    });
+        }
+
         return ResponseEntity.ok(Map.of("id", id, "statut", nouveau));
     }
 
