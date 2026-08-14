@@ -2,6 +2,16 @@ import { useEffect, useState } from 'react';
 import './App.css';
 import { api, lireJeton } from './api';
 
+function messageAgence(erreur) {
+  if (erreur === 'Agence non active') {
+    return "Votre agence est en cours de validation par l'equipe MeRoMbe. Vous recevrez l'acces des qu'elle sera activee.";
+  }
+  if (erreur === "Ce compte n'est rattache a aucune agence") {
+    return "Ce compte n'est rattache a aucune agence pour le moment.";
+  }
+  return erreur;
+}
+
 export default function BackOffice() {
   const [onglet, setOnglet] = useState('tableau');
   const utilisateur = lireJeton();
@@ -40,7 +50,7 @@ function Tableau() {
     api.tableauDeBord().then(setChiffres).catch((e) => setErreur(e.message));
   }, []);
 
-  if (erreur) return <p className="erreur">{erreur}</p>;
+  if (erreur) return <p className="erreur">{messageAgence(erreur)}</p>;
   if (!chiffres) return <p className="chargement">Chargement...</p>;
 
   return (
