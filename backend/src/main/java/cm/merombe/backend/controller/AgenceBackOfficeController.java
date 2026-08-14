@@ -7,6 +7,10 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 
 import cm.merombe.backend.dto.*;
 import cm.merombe.backend.entity.*;
@@ -182,6 +186,34 @@ public class AgenceBackOfficeController {
                         "quartier", l.getQuartier(),
                         "ville", l.getVille().getNom()))
                 .toList();
+    }
+
+    @PostMapping("/locaux")
+    @Transactional
+    public ResponseEntity<?> creerLocal(@RequestBody NouveauLocal demande) {
+        Agence agence = contexte.agenceCourante();
+
+        if (demande.villeId() == null) {
+            return ResponseEntity.badRequest().body(Map.of("erreur", "ville requise"));
+        }
+        if (demande.latitude() == null || demande.longitude() == null) {
+            return ResponseEntity.badRequest().body(Map.of("erreur", "position (latitude/longitude) requise"));
+        }
+
+        Ville ville = villes.findById(demande.villeId()).orElse(null);
+        if (ville == null) {
+            return ResponseEntity.badRequest().body(Map.of("erreur", "ville inconnue"));
+        }
+
+        GeometryFactory geometrie = new GeometryFactory(new PrecisionModel(), 4326);
+        Point position = geometrie.createPoint(
+                new Coordinate(demande.longitude(), demande.latitude()));
+
+        Local local = locaux.save(new Local(
+                agence, ville, demande.quartier(), demande.adresse(),
+                demande.telephone(), position));
+
+        return ResponseEntity.ok(Map.of("id", local.getId(), "message", "Local ajoute"));
     }
 
     // --- gestion du personnel (reserve au responsable) ---

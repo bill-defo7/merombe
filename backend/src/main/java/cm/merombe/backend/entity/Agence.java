@@ -35,6 +35,14 @@ public class Agence {
 
     private java.math.BigDecimal note;
 
+    public Agence(Ville ville, String nom, String contact, String description) {
+        this.ville = ville;
+        this.nom = nom;
+        this.contact = contact;
+        this.description = description;
+        this.statut = "en_attente";
+    }
+
     protected Agence() {
     }
 
@@ -50,5 +58,6 @@ public class Agence {
     public String getLogoUrl() { return logoUrl; }
     public String getPhotoUrl() { return photoUrl; }
     public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
     public java.math.BigDecimal getNote() { return note; }
 }

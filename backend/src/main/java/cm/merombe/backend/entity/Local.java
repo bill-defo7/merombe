@@ -37,6 +37,16 @@ public class Local {
     @Column(nullable = false)
     private Point position;
 
+    public Local(Agence agence, Ville ville, String quartier, String adresse,
+                 String telephone, Point position) {
+        this.agence = agence;
+        this.ville = ville;
+        this.quartier = quartier;
+        this.adresse = adresse;
+        this.telephone = telephone;
+        this.position = position;
+    }
+
     protected Local() {
     }
 
