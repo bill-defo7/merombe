@@ -8,6 +8,7 @@ import './App.css';
 import Logo from './Logo';
 import Embarquement from './Embarquement';
 import Inscription from './Inscription';
+import Admin from './Admin';
 
 export default function App() {
   const [ecran, setEcran] = useState('accueil');
@@ -41,10 +42,11 @@ export default function App() {
   }
 
   // --- espace agence : interface entierement distincte ---
- const estGuichet = utilisateur && ['guichetier', 'responsable', 'admin'].includes(utilisateur.role);
- const estAgent = utilisateur && utilisateur.role === 'agent';
+ const estGuichet = utilisateur && ['guichetier', 'responsable'].includes(utilisateur.role);
+  const estAgent = utilisateur && utilisateur.role === 'agent';
+  const estAdmin = utilisateur && utilisateur.role === 'admin';
 
-  if (estGuichet || estAgent) {
+  if (estGuichet || estAgent || estAdmin) {
     return (
       <div className="appli">
         <header className="barre">
@@ -57,7 +59,7 @@ export default function App() {
           </div>
         </header>
         <div className="contenu">
-          {estAgent ? <Embarquement /> : <BackOffice />}
+          {estAdmin ? <Admin /> : estAgent ? <Embarquement /> : <BackOffice />}
         </div>
       </div>
     );
