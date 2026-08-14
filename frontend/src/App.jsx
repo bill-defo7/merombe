@@ -14,7 +14,7 @@ export default function App() {
   const [apresConnexion, setApresConnexion] = useState(null);
 
   const utilisateur = jeton ? lireJeton() : null;
-  const estAgence = utilisateur && ['guichetier', 'agent', 'admin'].includes(utilisateur.role);
+  const estAgence = utilisateur && ['guichetier', 'agent', 'responsable', 'admin'].includes(utilisateur.role);
 
   const [choisi, setChoisi] = useState(null);
   const [reservation, setReservation] = useState(null);
@@ -40,7 +40,7 @@ export default function App() {
   }
 
   // --- espace agence : interface entierement distincte ---
- const estGuichet = utilisateur && ['guichetier', 'admin'].includes(utilisateur.role);
+ const estGuichet = utilisateur && ['guichetier', 'responsable', 'admin'].includes(utilisateur.role);
  const estAgent = utilisateur && utilisateur.role === 'agent';
 
   if (estGuichet || estAgent) {

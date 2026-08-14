@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { api } from './api';
 import './App.css';
 import { api, lireJeton } from './api';
 
@@ -624,7 +623,4 @@ function formaterDate(iso) {
   return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
-function formaterDate(iso) {
-  const d = new Date(iso + 'T00:00:00');
-  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-}
+
