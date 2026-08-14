@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { api } from './api';
 import './App.css';
+import { api, lireJeton } from './api';
 
 export default function BackOffice() {
   const [onglet, setOnglet] = useState('tableau');
+  const utilisateur = lireJeton();
+  const estResponsable = utilisateur?.role === 'responsable';
 
   return (
     <div>
@@ -14,11 +17,16 @@ export default function BackOffice() {
                 onClick={() => setOnglet('departs')}>Departs</button>
         <button className={onglet === 'offre' ? 'actif' : ''}
                 onClick={() => setOnglet('offre')}>Mon offre</button>
+        {estResponsable && (
+          <button className={onglet === 'equipe' ? 'actif' : ''}
+                  onClick={() => setOnglet('equipe')}>Equipe</button>
+        )}
       </nav>
 
       {onglet === 'tableau' && <Tableau />}
       {onglet === 'departs' && <Departs />}
       {onglet === 'offre' && <Offre />}
+      {onglet === 'equipe' && estResponsable && <Equipe />}
     </div>
   );
 }
@@ -468,6 +476,143 @@ function FormulaireHoraire({ liaisons, onCree }) {
 
         <button type="submit" className="bouton discret large" disabled={envoi}>
           {envoi ? 'Envoi...' : 'Declarer l\'horaire'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+/* ==================== Equipe (reserve au responsable) ==================== */
+
+function Equipe() {
+  const [membres, setMembres] = useState(null);
+  const [erreur, setErreur] = useState(null);
+
+  async function recharger() {
+    try {
+      setMembres(await api.mesMembres());
+    } catch (e) {
+      setErreur(e.message);
+    }
+  }
+
+  useEffect(() => { recharger(); }, []);
+
+  async function retirer(id, nom) {
+    if (!window.confirm(`Retirer ${nom} de l'equipe ?`)) return;
+    try {
+      await api.supprimerMembre(id);
+      recharger();
+    } catch (e) {
+      setErreur(e.message);
+    }
+  }
+
+  if (erreur) return <p className="erreur">{erreur}</p>;
+  if (!membres) return <p className="chargement">Chargement...</p>;
+
+  return (
+    <>
+      <div className="entete-resultats" style={{ marginTop: 0 }}>
+        <h2>Votre equipe</h2>
+        <span className="compteur">{membres.length} membre(s)</span>
+      </div>
+
+      {membres.length === 0 ? (
+        <p className="vide">Aucun membre pour l'instant.</p>
+      ) : (
+        <ul className="liste">
+          {membres.map((m) => (
+            <li key={m.id} className="ligne-offre">
+              <div>
+                <strong>{m.nom}</strong>
+                <span>{m.telephone} · {libelleRole(m.role)}</span>
+              </div>
+              {m.role !== 'responsable' && (
+                <button className="lien" onClick={() => retirer(m.id, m.nom)}>
+                  Retirer
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <FormulaireMembre onCree={recharger} />
+    </>
+  );
+}
+
+function libelleRole(role) {
+  if (role === 'guichetier') return 'Guichetier';
+  if (role === 'agent') return 'Agent d\'embarquement';
+  if (role === 'responsable') return 'Responsable';
+  return role;
+}
+
+/* ---- formulaire : ajouter un membre ---- */
+
+function FormulaireMembre({ onCree }) {
+  const [nom, setNom] = useState('');
+  const [telephone, setTelephone] = useState('');
+  const [role, setRole] = useState('guichetier');
+  const [erreur, setErreur] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [envoi, setEnvoi] = useState(false);
+
+  async function soumettre(e) {
+    e.preventDefault();
+    setErreur(null);
+    setMessage(null);
+
+    if (!nom.trim() || !telephone.trim()) {
+      setErreur('Le nom et le telephone sont obligatoires.');
+      return;
+    }
+
+    setEnvoi(true);
+    try {
+      await api.creerMembre(nom.trim(), telephone.trim(), role);
+      setMessage('Membre ajoute avec succes.');
+      setNom('');
+      setTelephone('');
+      onCree();
+    } catch (e) {
+      setErreur(e.message);
+    } finally {
+      setEnvoi(false);
+    }
+  }
+
+  return (
+    <div className="bloc" style={{ marginTop: 28 }}>
+      <h2>Ajouter un membre</h2>
+      <form onSubmit={soumettre} className="formulaire">
+        <label>
+          Nom complet
+          <input type="text" value={nom} onChange={(e) => setNom(e.target.value)}
+                 placeholder="ex : Paul Ngono" />
+        </label>
+
+        <label>
+          Telephone
+          <input type="tel" value={telephone} onChange={(e) => setTelephone(e.target.value)}
+                 placeholder="ex : +237677000000" />
+        </label>
+
+        <label>
+          Role
+          <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="guichetier">Guichetier</option>
+            <option value="agent">Agent d'embarquement</option>
+          </select>
+        </label>
+
+        {message && <p className="succes">{message}</p>}
+        {erreur && <p className="erreur">{erreur}</p>}
+
+        <button type="submit" className="bouton discret large" disabled={envoi}>
+          {envoi ? 'Envoi...' : 'Ajouter le membre'}
         </button>
       </form>
     </div>

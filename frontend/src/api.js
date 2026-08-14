@@ -112,6 +112,18 @@ export const api = {
 
   mesLocaux: () => appeler('/agence/locaux'),
 
+  // --- gestion du personnel (responsable) ---
+  mesMembres: () => appeler('/agence/personnel'),
+
+  creerMembre: (nom, telephone, role) =>
+    appeler('/agence/personnel', {
+      method: 'POST',
+      body: JSON.stringify({ nom, telephone, role }),
+    }),
+
+  supprimerMembre: (id) =>
+    appeler(`/agence/personnel/${id}`, { method: 'DELETE' }),
+
   // --- administration ---
   synthese: () => appeler('/admin/synthese'),
 
