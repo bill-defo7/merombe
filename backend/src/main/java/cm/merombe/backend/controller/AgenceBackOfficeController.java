@@ -18,6 +18,7 @@ import cm.merombe.backend.repository.*;
 import cm.merombe.backend.service.ContexteUtilisateur;
 import cm.merombe.backend.service.GenerationDeparts;
 import jakarta.transaction.Transactional;
+import cm.merombe.backend.util.Telephone;
 
 @RestController
 @RequestMapping("/api/agence")
@@ -256,11 +257,19 @@ public class AgenceBackOfficeController {
         if (!List.of("guichetier", "agent").contains(demande.role())) {
             return ResponseEntity.badRequest().body(Map.of("erreur", "role invalide"));
         }
-        if (utilisateurs.findByTelephone(demande.telephone()).isPresent()) {
+
+        String telephone;
+        try {
+            telephone = Telephone.normaliser(demande.telephone());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("erreur", e.getMessage()));
+        }
+
+        if (utilisateurs.findByTelephone(telephone).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("erreur", "ce telephone est deja utilise"));
         }
 
-        Utilisateur membre = new Utilisateur(demande.telephone());
+        Utilisateur membre = new Utilisateur(telephone);
         membre.setNom(demande.nom());
         membre.setRole(demande.role());
         membre.setAgence(agence);

@@ -2,7 +2,6 @@ package cm.merombe.backend.service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +11,7 @@ import cm.merombe.backend.entity.Utilisateur;
 import cm.merombe.backend.repository.CodeVerificationRepository;
 import cm.merombe.backend.repository.UtilisateurRepository;
 import cm.merombe.backend.security.JwtService;
+import cm.merombe.backend.util.Telephone;
 
 @Service
 public class AuthService {
@@ -32,7 +32,8 @@ public class AuthService {
     }
 
     @Transactional
-    public void demanderCode(String telephone) {
+    public void demanderCode(String telephoneSaisi) {
+        String telephone = Telephone.normaliser(telephoneSaisi);
         String code = String.format("%06d", aleatoire.nextInt(1_000_000));
         LocalDateTime expiration = LocalDateTime.now().plusMinutes(DUREE_VALIDITE_MINUTES);
 
@@ -44,7 +45,9 @@ public class AuthService {
     }
 
     @Transactional
-    public String verifierCode(String telephone, String codeSaisi) {
+    public String verifierCode(String telephoneSaisi, String codeSaisi) {
+        String telephone = Telephone.normaliser(telephoneSaisi);
+
         CodeVerification enregistre = codes
                 .findFirstByTelephoneAndUtiliseFalseOrderByCreeLeDesc(telephone)
                 .orElseThrow(() -> new IllegalArgumentException("Aucun code en attente pour ce numero"));

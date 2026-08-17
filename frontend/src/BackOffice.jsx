@@ -115,7 +115,7 @@ function Departs() {
     }
   }
 
-  if (erreur) return <p className="erreur">{erreur}</p>;
+  if (erreur) return <p className="erreur">{messageAgence(erreur)}</p>;
   if (!departs) return <p className="chargement">Chargement...</p>;
   if (departs.length === 0) {
     return (
@@ -709,7 +709,7 @@ function libelleRole(role) {
 
 function FormulaireMembre({ onCree }) {
   const [nom, setNom] = useState('');
-  const [telephone, setTelephone] = useState('');
+  const [telLocal, setTelLocal] = useState('');
   const [role, setRole] = useState('guichetier');
   const [erreur, setErreur] = useState(null);
   const [message, setMessage] = useState(null);
@@ -720,17 +720,17 @@ function FormulaireMembre({ onCree }) {
     setErreur(null);
     setMessage(null);
 
-    if (!nom.trim() || !telephone.trim()) {
-      setErreur('Le nom et le telephone sont obligatoires.');
+    if (!nom.trim() || telLocal.length !== 9) {
+      setErreur('Le nom est obligatoire et le telephone doit comporter 9 chiffres.');
       return;
     }
 
     setEnvoi(true);
     try {
-      await api.creerMembre(nom.trim(), telephone.trim(), role);
+      await api.creerMembre(nom.trim(), '+237' + telLocal, role);
       setMessage('Membre ajoute avec succes.');
       setNom('');
-      setTelephone('');
+      setTelLocal('');
       onCree();
     } catch (e) {
       setErreur(e.message);
@@ -749,10 +749,20 @@ function FormulaireMembre({ onCree }) {
                  placeholder="ex : Paul Ngono" />
         </label>
 
-        <label>
+       <label>
           Telephone
-          <input type="tel" value={telephone} onChange={(e) => setTelephone(e.target.value)}
-                 placeholder="ex : +237677000000" />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <span style={{
+              padding: '10px 12px', border: '1px solid #ddd', borderRadius: 8,
+              background: '#f5f5f5', fontWeight: 600,
+            }}>
+              +237
+            </span>
+            <input type="tel" inputMode="numeric" maxLength={9}
+                   value={telLocal}
+                   onChange={(e) => setTelLocal(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                   placeholder="6XX XX XX XX" style={{ flex: 1 }} />
+          </div>
         </label>
 
         <label>

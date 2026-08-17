@@ -4,14 +4,20 @@ import './App.css';
 
 export default function Connexion({ surConnexion, surAnnulation }) {
   const [etape, setEtape] = useState('telephone');
-  const [telephone, setTelephone] = useState('+237');
+  const [numeroLocal, setNumeroLocal] = useState('');
   const [code, setCode] = useState('');
   const [erreur, setErreur] = useState(null);
   const [chargement, setChargement] = useState(false);
 
+  const telephone = '+237' + numeroLocal;
+
   async function envoyerCode(e) {
     e.preventDefault();
     setErreur(null);
+    if (numeroLocal.length !== 9) {
+      setErreur('Le numero doit comporter 9 chiffres.');
+      return;
+    }
     setChargement(true);
     try {
       await api.demanderCode(telephone);
@@ -51,14 +57,25 @@ export default function Connexion({ surConnexion, surAnnulation }) {
           <form onSubmit={envoyerCode}>
             <label className="champ" style={{ marginBottom: 18 }}>
               <span>Numero de telephone</span>
-              <input
-                type="tel"
-                placeholder="+237 6XX XX XX XX"
-                value={telephone}
-                onChange={(e) => setTelephone(e.target.value)}
-                autoFocus
-                required
-              />
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span style={{
+                  padding: '10px 12px', border: '1px solid #ddd', borderRadius: 8,
+                  background: '#f5f5f5', fontWeight: 600,
+                }}>
+                  +237
+                </span>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  placeholder="6XX XX XX XX"
+                  maxLength={9}
+                  value={numeroLocal}
+                  onChange={(e) => setNumeroLocal(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                  autoFocus
+                  required
+                  style={{ flex: 1 }}
+                />
+              </div>
             </label>
 
             {erreur && <p className="erreur">{erreur}</p>}

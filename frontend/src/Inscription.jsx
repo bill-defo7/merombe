@@ -9,7 +9,7 @@ export default function Inscription({ surRetour }) {
   const [contact, setContact] = useState('');
   const [description, setDescription] = useState('');
   const [nomResponsable, setNomResponsable] = useState('');
-  const [telephoneResponsable, setTelephoneResponsable] = useState('');
+  const [telResponsableLocal, setTelResponsableLocal] = useState('');
   const [erreur, setErreur] = useState(null);
   const [succes, setSucces] = useState(null);
   const [envoi, setEnvoi] = useState(false);
@@ -22,7 +22,7 @@ export default function Inscription({ surRetour }) {
     e.preventDefault();
     setErreur(null);
 
-    if (!nom.trim() || !villeId || !nomResponsable.trim() || !telephoneResponsable.trim()) {
+    if (!nom.trim() || !villeId || !nomResponsable.trim() || telResponsableLocal.length !== 9) {
       setErreur('Merci de remplir tous les champs obligatoires.');
       return;
     }
@@ -35,7 +35,7 @@ export default function Inscription({ surRetour }) {
         contact: contact.trim() || null,
         description: description.trim() || null,
         nomResponsable: nomResponsable.trim(),
-        telephoneResponsable: telephoneResponsable.trim(),
+        telephoneResponsable: '+237' + telResponsableLocal,
       });
       setSucces(r.message);
     } catch (e) {
@@ -112,9 +112,18 @@ export default function Inscription({ surRetour }) {
 
           <label>
             Telephone du responsable
-            <input type="tel" value={telephoneResponsable}
-                   onChange={(e) => setTelephoneResponsable(e.target.value)}
-                   placeholder="ex : +237677000000" />
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{
+                padding: '10px 12px', border: '1px solid #ddd', borderRadius: 8,
+                background: '#f5f5f5', fontWeight: 600,
+              }}>
+                +237
+              </span>
+              <input type="tel" inputMode="numeric" maxLength={9}
+                     value={telResponsableLocal}
+                     onChange={(e) => setTelResponsableLocal(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                     placeholder="6XX XX XX XX" style={{ flex: 1 }} />
+            </div>
             <span style={{ fontSize: 12, color: 'var(--gris)' }}>
               Ce numero servira a se connecter a l'espace agence.
             </span>

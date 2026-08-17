@@ -17,6 +17,7 @@ import cm.merombe.backend.entity.Ville;
 import cm.merombe.backend.repository.AgenceRepository;
 import cm.merombe.backend.repository.UtilisateurRepository;
 import cm.merombe.backend.repository.VilleRepository;
+import cm.merombe.backend.util.Telephone;
 
 @RestController
 @RequestMapping("/api/agences")
@@ -74,14 +75,21 @@ public class AgenceController {
             return ResponseEntity.badRequest().body(Map.of("erreur", "ville inconnue"));
         }
 
-        if (utilisateurs.findByTelephone(demande.telephoneResponsable()).isPresent()) {
+        String telephoneResponsable;
+        try {
+            telephoneResponsable = Telephone.normaliser(demande.telephoneResponsable());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("erreur", e.getMessage()));
+        }
+
+        if (utilisateurs.findByTelephone(telephoneResponsable).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("erreur", "ce telephone est deja utilise"));
         }
 
         Agence agence = agences.save(
                 new Agence(ville, demande.nom(), demande.contact(), demande.description()));
 
-        Utilisateur responsable = new Utilisateur(demande.telephoneResponsable());
+        Utilisateur responsable = new Utilisateur(telephoneResponsable);
         responsable.setNom(demande.nomResponsable());
         responsable.setRole("responsable");
         responsable.setAgence(agence);
