@@ -136,6 +136,12 @@ export const api = {
       body: JSON.stringify({ statut }),
     }),
 
+    modifierPhotosAgence: (id, logoUrl, photoUrl) =>
+    appeler(`/admin/agences/${id}/photos`, {
+      method: 'POST',
+      body: JSON.stringify({ logoUrl, photoUrl }),
+    }),
+
   litiges: () => appeler('/admin/paiements-litiges'),
 
   trancherLitige: (reference, decision) =>

@@ -60,4 +60,6 @@ public class Agence {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     public java.math.BigDecimal getNote() { return note; }
+    public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
+    public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }
 }

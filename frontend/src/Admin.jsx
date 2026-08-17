@@ -118,35 +118,88 @@ function Agences() {
       {agences && agences.length > 0 && (
         <ul className="liste">
           {agences.map((a) => (
-            <li key={a.id} className="ligne-offre">
-              <div>
-                <strong>{a.nom}</strong>
-                <span>{a.ville} {a.contact && `· ${a.contact}`}</span>
-                {a.description && (
-                  <span style={{ display: 'block', fontSize: 13, marginTop: 4 }}>
-                    {a.description}
-                  </span>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {a.statut !== 'active' && (
-                  <button className="bouton discret" disabled={enCours === a.id}
-                          onClick={() => changerStatut(a.id, 'active')}>
-                    Activer
-                  </button>
-                )}
-                {a.statut !== 'suspendue' && (
-                  <button className="lien" disabled={enCours === a.id}
-                          onClick={() => changerStatut(a.id, 'suspendue')}>
-                    Suspendre
-                  </button>
-                )}
-              </div>
-            </li>
+            <LigneAgence key={a.id} agence={a} enCours={enCours === a.id}
+                         onChangerStatut={changerStatut} />
           ))}
         </ul>
       )}
     </>
+  );
+}
+
+function LigneAgence({ agence, enCours, onChangerStatut }) {
+  const [ouvert, setOuvert] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(agence.logoUrl || '');
+  const [photoUrl, setPhotoUrl] = useState(agence.photoUrl || '');
+  const [message, setMessage] = useState(null);
+  const [erreur, setErreur] = useState(null);
+  const [envoi, setEnvoi] = useState(false);
+
+  async function enregistrerPhotos() {
+    setMessage(null);
+    setErreur(null);
+    setEnvoi(true);
+    try {
+      await api.modifierPhotosAgence(agence.id, logoUrl.trim(), photoUrl.trim());
+      setMessage('Photos enregistrees.');
+    } catch (e) {
+      setErreur(e.message);
+    } finally {
+      setEnvoi(false);
+    }
+  }
+
+  return (
+    <li className="ligne-offre" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+        <div>
+          <strong>{agence.nom}</strong>
+          <span>{agence.ville} {agence.contact && `· ${agence.contact}`}</span>
+          {agence.description && (
+            <span style={{ display: 'block', fontSize: 13, marginTop: 4 }}>
+              {agence.description}
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+          {agence.statut !== 'active' && (
+            <button className="bouton discret" disabled={enCours}
+                    onClick={() => onChangerStatut(agence.id, 'active')}>
+              Activer
+            </button>
+          )}
+          {agence.statut !== 'suspendue' && (
+            <button className="lien" disabled={enCours}
+                    onClick={() => onChangerStatut(agence.id, 'suspendue')}>
+              Suspendre
+            </button>
+          )}
+          <button className="lien" onClick={() => setOuvert(!ouvert)}>
+            {ouvert ? 'Fermer' : 'Photos'}
+          </button>
+        </div>
+      </div>
+
+      {ouvert && (
+        <div className="formulaire" style={{ marginTop: 14, maxWidth: 480 }}>
+          <label>
+            Lien du logo
+            <input type="url" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)}
+                   placeholder="https://..." />
+          </label>
+          <label>
+            Lien de la photo de couverture
+            <input type="url" value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)}
+                   placeholder="https://..." />
+          </label>
+          {message && <p className="succes">{message}</p>}
+          {erreur && <p className="erreur">{erreur}</p>}
+          <button className="bouton discret" onClick={enregistrerPhotos} disabled={envoi}>
+            {envoi ? 'Enregistrement...' : 'Enregistrer'}
+          </button>
+        </div>
+      )}
+    </li>
   );
 }
 

@@ -82,7 +82,9 @@ public class AdminController {
                 "contact", a.getContact() == null ? "" : a.getContact(),
                 "ville", a.getVille().getNom(),
                 "statut", a.getStatut(),
-                "description", a.getDescription() == null ? "" : a.getDescription()))
+                "description", a.getDescription() == null ? "" : a.getDescription(),
+                "logoUrl", a.getLogoUrl() == null ? "" : a.getLogoUrl(),
+                "photoUrl", a.getPhotoUrl() == null ? "" : a.getPhotoUrl()))
                 .toList();
     }
 
@@ -117,6 +119,29 @@ public class AdminController {
         }
 
         return ResponseEntity.ok(Map.of("id", id, "statut", nouveau));
+    }
+
+    /** Met a jour les liens des images d'une agence (logo, photo de couverture). */
+    @PostMapping("/agences/{id}/photos")
+    @Transactional
+    public ResponseEntity<?> modifierPhotos(@PathVariable Integer id,
+                                            @RequestBody Map<String, String> corps) {
+        Agence agence = agences.findById(id).orElse(null);
+        if (agence == null) {
+            return ResponseEntity.status(404).body(Map.of("erreur", "agence inconnue"));
+        }
+
+        String logoUrl = corps.get("logoUrl");
+        String photoUrl = corps.get("photoUrl");
+
+        if (logoUrl != null) {
+            agence.setLogoUrl(logoUrl.isBlank() ? null : logoUrl.trim());
+        }
+        if (photoUrl != null) {
+            agence.setPhotoUrl(photoUrl.isBlank() ? null : photoUrl.trim());
+        }
+
+        return ResponseEntity.ok(Map.of("id", id, "message", "Photos mises a jour"));
     }
 
     /** Paiements sans reponse de l'agregateur, a rapprocher a la main. */
