@@ -555,6 +555,10 @@ function FormulaireHoraire({ liaisons, onCree }) {
       setErreur('Remplissez tous les champs obligatoires.');
       return;
     }
+    if (Number(tarif) > 1000000) {
+      setErreur('Le tarif ne peut pas depasser 1 000 000 FCFA.');
+      return;
+    }
 
     setEnvoi(true);
     try {
@@ -616,8 +620,11 @@ function FormulaireHoraire({ liaisons, onCree }) {
 
         <label>
           Tarif (FCFA)
-          <input type="number" min="0" value={tarif}
-                 onChange={(e) => setTarif(e.target.value)} placeholder="ex : 5000" />
+          <input type="number" min="0" max="1000000" value={tarif}
+                onChange={(e) => setTarif(e.target.value)} placeholder="ex : 5000" />
+          <span style={{ fontSize: 12, color: 'var(--gris)' }}>
+            Maximum 1 000 000 FCFA
+          </span>
         </label>
 
         <label className="ligne-case">

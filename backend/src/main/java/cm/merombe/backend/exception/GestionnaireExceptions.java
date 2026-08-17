@@ -28,4 +28,10 @@ public class GestionnaireExceptions {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Map.of("erreur", e.getMessage()));
     }
+
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<?> corpsIllisible(org.springframework.http.converter.HttpMessageNotReadableException e) {
+        return ResponseEntity.badRequest()
+                .body(Map.of("erreur", "Donnees invalides : verifiez les valeurs saisies (nombre trop grand ?)"));
+    }
 }

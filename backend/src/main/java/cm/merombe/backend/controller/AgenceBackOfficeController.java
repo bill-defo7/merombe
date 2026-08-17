@@ -109,8 +109,8 @@ public class AgenceBackOfficeController {
         if (demande.places() == null || demande.places() < 1) {
             return ResponseEntity.badRequest().body(Map.of("erreur", "nombre de places invalide"));
         }
-        if (demande.tarif() == null || demande.tarif() < 0) {
-            return ResponseEntity.badRequest().body(Map.of("erreur", "tarif invalide"));
+        if (demande.tarif() == null || demande.tarif() < 0 || demande.tarif() > 1_000_000) {
+            return ResponseEntity.badRequest().body(Map.of("erreur", "tarif invalide : doit etre entre 0 et 1 000 000 FCFA"));
         }
 
         LocalTime heure = demande.heure();
@@ -119,7 +119,15 @@ public class AgenceBackOfficeController {
 
         Horaire cree = horaires.save(new Horaire(
                 liaison, heure, jours, demande.places(), demande.tarif(), garantie));
-        return ResponseEntity.ok(Map.of("id", cree.getId(), "message", "Horaire cree"));
+
+        // genere immediatement les departs des 14 prochains jours pour ce nouvel
+        // horaire, plutot que d'attendre le clic manuel ou le job de nuit
+        int crees = generation.genererProchainsJours();
+
+        return ResponseEntity.ok(Map.of(
+                "id", cree.getId(),
+                "message", "Horaire cree",
+                "departsGeneres", crees));
     }
 
     // declenchement manuel, utile en developpement et apres une declaration
